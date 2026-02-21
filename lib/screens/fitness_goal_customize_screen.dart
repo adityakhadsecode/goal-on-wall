@@ -33,6 +33,9 @@ class _FitnessGoalCustomizeScreenState
   final _eventMonthCtrl = TextEditingController();
   final _eventDayCtrl = TextEditingController();
 
+  // Validation
+  bool _dateOrderError = false;
+
   @override
   void dispose() {
     _goalCtrl.dispose();
@@ -67,6 +70,21 @@ class _FitnessGoalCustomizeScreenState
     return DateTime(y, m + 1, 0).day;
   }
 
+  void _checkDateOrder() {
+    if (!_isComplete) return;
+    final start = DateTime(
+      int.parse(_startYearCtrl.text),
+      int.parse(_startMonthCtrl.text),
+      int.parse(_startDayCtrl.text),
+    );
+    final end = DateTime(
+      int.parse(_eventYearCtrl.text),
+      int.parse(_eventMonthCtrl.text),
+      int.parse(_eventDayCtrl.text),
+    );
+    setState(() => _dateOrderError = !start.isBefore(end));
+  }
+
   void _generate(AppColorPalette palette) {
     if (!_isComplete) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -91,6 +109,32 @@ class _FitnessGoalCustomizeScreenState
       int.parse(_eventMonthCtrl.text),
       int.parse(_eventDayCtrl.text),
     );
+    if (!startDate.isBefore(endDate)) {
+      setState(() => _dateOrderError = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: palette.cardBackground,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              Icon(Icons.error_outline_rounded,
+                  color: Colors.redAccent, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Training start must be earlier than the event date.',
+                  style: TextStyle(color: palette.textPrimary),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      return;
+    }
+    setState(() => _dateOrderError = false);
     final label = _targetCtrl.text.trim().isNotEmpty
         ? '${_goalCtrl.text} · ${_targetCtrl.text}'
         : _goalCtrl.text;
@@ -289,7 +333,10 @@ class _FitnessGoalCustomizeScreenState
                               maxValue: 2099,
                               minValue: 1900,
                               palette: palette,
-                              onChanged: (_) => setState(() {}),
+                              onChanged: (_) {
+                                setState(() {});
+                                _checkDateOrder();
+                              },
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -301,7 +348,10 @@ class _FitnessGoalCustomizeScreenState
                               maxLength: 2,
                               maxValue: 12,
                               palette: palette,
-                              onChanged: (_) => setState(() {}),
+                              onChanged: (_) {
+                                setState(() {});
+                                _checkDateOrder();
+                              },
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -313,13 +363,40 @@ class _FitnessGoalCustomizeScreenState
                               maxLength: 2,
                               maxValue: _eventMaxDay,
                               palette: palette,
-                              onChanged: (_) => setState(() {}),
+                              onChanged: (_) {
+                                setState(() {});
+                                _checkDateOrder();
+                              },
                             ),
                           ),
                         ],
                       ),
                     ],
                   ),
+                ),
+
+                // Inline date order error
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  child: _dateOrderError
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 8, left: 4),
+                          child: Row(
+                            children: [
+                              Icon(Icons.error_outline_rounded,
+                                  color: Colors.redAccent, size: 14),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Training start must be earlier than the event date.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
 
                 const SizedBox(height: 28),

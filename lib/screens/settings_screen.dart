@@ -4,9 +4,73 @@ import '../theme/app_theme.dart';
 import '../theme/theme_provider.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
+import '../services/user_prefs.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  DateTime? _savedBirthDate;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadBirthDate();
+  }
+
+  Future<void> _loadBirthDate() async {
+    final date = await UserPrefs.getBirthDate();
+    if (mounted) setState(() => _savedBirthDate = date);
+  }
+
+  String get _birthDateLabel {
+    if (_savedBirthDate == null) return 'Not set';
+    final months = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return '${months[_savedBirthDate!.month - 1]} ${_savedBirthDate!.day}, ${_savedBirthDate!.year}';
+  }
+
+  void _showBirthDateSheet(AppColorPalette palette) {
+    final initial = _savedBirthDate;
+    final dayCtrl = TextEditingController(
+      text: initial != null ? initial.day.toString().padLeft(2, '0') : '',
+    );
+    final monthCtrl = TextEditingController(
+      text: initial != null ? initial.month.toString().padLeft(2, '0') : '',
+    );
+    final yearCtrl = TextEditingController(
+      text: initial != null ? initial.year.toString() : '',
+    );
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+          ),
+          child: _BirthDateSheet(
+            palette: palette,
+            dayCtrl: dayCtrl,
+            monthCtrl: monthCtrl,
+            yearCtrl: yearCtrl,
+            onSave: (date) async {
+              await UserPrefs.saveBirthDate(date);
+              if (mounted) setState(() => _savedBirthDate = date);
+            },
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,11 +205,12 @@ class SettingsScreen extends StatelessWidget {
                     padding: const EdgeInsets.all(4),
                     child: Column(
                       children: [
-                        _buildSettingsItem(
+                        _buildTappableSettingsItem(
                           'Birth Date',
-                          'January 1, 2000',
+                          _birthDateLabel,
                           Icons.cake_rounded,
                           palette,
+                          onTap: () => _showBirthDateSheet(palette),
                         ),
                         Divider(
                           color: Colors.white.withValues(alpha: 0.05),
@@ -225,7 +290,6 @@ class SettingsScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
           child: Row(
             children: [
-              // Theme color preview
               Container(
                 width: 40,
                 height: 40,
@@ -418,6 +482,329 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTappableSettingsItem(
+    String title,
+    String subtitle,
+    IconData icon,
+    dynamic palette, {
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: palette.primary.withValues(alpha: 0.2),
+                ),
+                child: Icon(icon, color: palette.primaryLight, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: palette.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: subtitle == 'Not set'
+                            ? palette.primaryLight
+                            : palette.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.edit_rounded,
+                color: palette.primaryLight,
+                size: 18,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Birth Date Bottom Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _BirthDateSheet extends StatefulWidget {
+  const _BirthDateSheet({
+    required this.palette,
+    required this.dayCtrl,
+    required this.monthCtrl,
+    required this.yearCtrl,
+    required this.onSave,
+  });
+
+  final AppColorPalette palette;
+  final TextEditingController dayCtrl;
+  final TextEditingController monthCtrl;
+  final TextEditingController yearCtrl;
+  final Future<void> Function(DateTime) onSave;
+
+  @override
+  State<_BirthDateSheet> createState() => _BirthDateSheetState();
+}
+
+class _BirthDateSheetState extends State<_BirthDateSheet> {
+  bool _saving = false;
+
+  bool get _isComplete =>
+      widget.dayCtrl.text.length == 2 &&
+      widget.monthCtrl.text.length == 2 &&
+      widget.yearCtrl.text.length == 4;
+
+  int get _maxDay {
+    final y = int.tryParse(widget.yearCtrl.text) ?? DateTime.now().year;
+    final m = (int.tryParse(widget.monthCtrl.text) ?? 1).clamp(1, 12);
+    return DateTime(y, m + 1, 0).day;
+  }
+
+  Future<void> _save() async {
+    if (!_isComplete) return;
+    setState(() => _saving = true);
+    final date = DateTime(
+      int.parse(widget.yearCtrl.text),
+      int.parse(widget.monthCtrl.text),
+      int.parse(widget.dayCtrl.text),
+    );
+    await widget.onSave(date);
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.palette;
+    return Container(
+      decoration: BoxDecoration(
+        color: p.cardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Container(
+            width: 36,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          Row(
+            children: [
+              Icon(Icons.cake_rounded, color: p.primaryLight, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                'Your Birthdate',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: p.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Saved and used automatically in Life Calendar',
+            style: TextStyle(fontSize: 12, color: p.textMuted),
+          ),
+          const SizedBox(height: 24),
+
+          Row(
+            children: [
+              Expanded(
+                child: _SheetDateField(
+                  controller: widget.dayCtrl,
+                  hint: 'DD',
+                  label: 'Day',
+                  maxLength: 2,
+                  maxValue: _maxDay,
+                  palette: p,
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _SheetDateField(
+                  controller: widget.monthCtrl,
+                  hint: 'MM',
+                  label: 'Month',
+                  maxLength: 2,
+                  maxValue: 12,
+                  palette: p,
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                flex: 2,
+                child: _SheetDateField(
+                  controller: widget.yearCtrl,
+                  hint: 'YYYY',
+                  label: 'Year',
+                  maxLength: 4,
+                  maxValue: DateTime.now().year,
+                  minValue: 1900,
+                  palette: p,
+                  onChanged: (_) => setState(() {}),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 24),
+
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _isComplete && !_saving ? _save : null,
+              style: FilledButton.styleFrom(
+                backgroundColor: p.primaryLight,
+                disabledBackgroundColor: p.primaryLight.withValues(alpha: 0.3),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
+              child: _saving
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(
+                      'Save Birthdate',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// Simple themed text field for the bottom sheet
+class _SheetDateField extends StatelessWidget {
+  const _SheetDateField({
+    required this.controller,
+    required this.hint,
+    required this.label,
+    required this.maxLength,
+    required this.maxValue,
+    required this.palette,
+    required this.onChanged,
+    this.minValue,
+  });
+
+  final TextEditingController controller;
+  final String hint;
+  final String label;
+  final int maxLength;
+  final int maxValue;
+  final int? minValue;
+  final AppColorPalette palette;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: TextStyle(
+                fontSize: 10,
+                color: palette.textMuted,
+                letterSpacing: 1,
+                fontWeight: FontWeight.w600)),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          maxLength: maxLength,
+          onChanged: (val) {
+            final n = int.tryParse(val);
+            if (n != null) {
+              final clamped = n.clamp(minValue ?? 1, maxValue);
+              if (clamped != n || val.length == maxLength) {
+                final s = maxLength == 4
+                    ? clamped.toString()
+                    : clamped.toString().padLeft(2, '0');
+                controller.value = TextEditingValue(
+                  text: s,
+                  selection: TextSelection.collapsed(offset: s.length),
+                );
+              }
+            }
+            onChanged(controller.text);
+          },
+          style: TextStyle(
+            color: palette.textPrimary,
+            fontWeight: FontWeight.w600,
+            fontSize: 16,
+          ),
+          textAlign: TextAlign.center,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: TextStyle(color: palette.textMuted, fontSize: 14),
+            counterText: '',
+            filled: true,
+            fillColor: Colors.white.withValues(alpha: 0.05),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.1), width: 1),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.1), width: 1),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: palette.primaryLight, width: 1.5),
+            ),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          ),
+        ),
+      ],
     );
   }
 }

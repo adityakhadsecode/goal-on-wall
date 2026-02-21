@@ -32,6 +32,9 @@ class _ProductLaunchCustomizeScreenState
   final _launchMonthCtrl = TextEditingController();
   final _launchDayCtrl = TextEditingController();
 
+  // Validation
+  bool _dateOrderError = false;
+
   @override
   void dispose() {
     _productCtrl.dispose();
@@ -65,6 +68,21 @@ class _ProductLaunchCustomizeScreenState
     return DateTime(y, m + 1, 0).day;
   }
 
+  void _checkDateOrder() {
+    if (!_isComplete) return;
+    final start = DateTime(
+      int.parse(_startYearCtrl.text),
+      int.parse(_startMonthCtrl.text),
+      int.parse(_startDayCtrl.text),
+    );
+    final end = DateTime(
+      int.parse(_launchYearCtrl.text),
+      int.parse(_launchMonthCtrl.text),
+      int.parse(_launchDayCtrl.text),
+    );
+    setState(() => _dateOrderError = !start.isBefore(end));
+  }
+
   void _generate(AppColorPalette palette) {
     if (!_isComplete) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -89,6 +107,32 @@ class _ProductLaunchCustomizeScreenState
       int.parse(_launchMonthCtrl.text),
       int.parse(_launchDayCtrl.text),
     );
+    if (!startDate.isBefore(endDate)) {
+      setState(() => _dateOrderError = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: palette.cardBackground,
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          content: Row(
+            children: [
+              Icon(Icons.error_outline_rounded,
+                  color: Colors.redAccent, size: 18),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Start date must be earlier than the launch date.',
+                  style: TextStyle(color: palette.textPrimary),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+      return;
+    }
+    setState(() => _dateOrderError = false);
     final wallpaperData = WallpaperData(
       calendarType: CalendarType.productLaunch,
       wallpaperTheme: widget.wallpaperTheme,
@@ -272,7 +316,10 @@ class _ProductLaunchCustomizeScreenState
                               maxValue: 2099,
                               minValue: 1900,
                               palette: palette,
-                              onChanged: (_) => setState(() {}),
+                              onChanged: (_) {
+                                setState(() {});
+                                _checkDateOrder();
+                              },
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -284,7 +331,10 @@ class _ProductLaunchCustomizeScreenState
                               maxLength: 2,
                               maxValue: 12,
                               palette: palette,
-                              onChanged: (_) => setState(() {}),
+                              onChanged: (_) {
+                                setState(() {});
+                                _checkDateOrder();
+                              },
                             ),
                           ),
                           const SizedBox(width: 10),
@@ -296,13 +346,40 @@ class _ProductLaunchCustomizeScreenState
                               maxLength: 2,
                               maxValue: _launchMaxDay,
                               palette: palette,
-                              onChanged: (_) => setState(() {}),
+                              onChanged: (_) {
+                                setState(() {});
+                                _checkDateOrder();
+                              },
                             ),
                           ),
                         ],
                       ),
                     ],
                   ),
+                ),
+
+                // Inline date order error
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  child: _dateOrderError
+                      ? Padding(
+                          padding: const EdgeInsets.only(top: 8, left: 4),
+                          child: Row(
+                            children: [
+                              Icon(Icons.error_outline_rounded,
+                                  color: Colors.redAccent, size: 14),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Start date must be earlier than the launch date.',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.redAccent,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : const SizedBox.shrink(),
                 ),
 
                 const SizedBox(height: 28),
