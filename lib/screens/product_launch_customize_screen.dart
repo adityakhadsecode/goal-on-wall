@@ -6,6 +6,7 @@ import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/customize_shared_widgets.dart';
 import '../models/wallpaper_config.dart';
+import 'wallpaper_preview_screen.dart';
 
 class ProductLaunchCustomizeScreen extends StatefulWidget {
   const ProductLaunchCustomizeScreen({super.key, required this.wallpaperTheme});
@@ -66,16 +67,27 @@ class _ProductLaunchCustomizeScreenState
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: palette.cardBackground,
-        behavior: SnackBarBehavior.floating,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Text(
-          'Generating Product Launch wallpaper for "${_productCtrl.text}"…',
-          style: TextStyle(color: palette.primaryLight),
-        ),
+    final startDate = DateTime(
+      int.parse(_startYearCtrl.text),
+      int.parse(_startMonthCtrl.text),
+      int.parse(_startDayCtrl.text),
+    );
+    final endDate = DateTime(
+      int.parse(_launchYearCtrl.text),
+      int.parse(_launchMonthCtrl.text),
+      int.parse(_launchDayCtrl.text),
+    );
+    final wallpaperData = WallpaperData(
+      calendarType: CalendarType.productLaunch,
+      wallpaperTheme: widget.wallpaperTheme,
+      startDate: startDate,
+      endDate: endDate,
+      label: _productCtrl.text,
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WallpaperPreviewScreen(data: wallpaperData),
       ),
     );
   }

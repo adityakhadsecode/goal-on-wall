@@ -6,6 +6,7 @@ import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/customize_shared_widgets.dart';
 import '../models/wallpaper_config.dart';
+import 'wallpaper_preview_screen.dart';
 
 class GoalCustomizeScreen extends StatefulWidget {
   const GoalCustomizeScreen({super.key, required this.wallpaperTheme});
@@ -66,16 +67,27 @@ class _GoalCustomizeScreenState extends State<GoalCustomizeScreen> {
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: palette.cardBackground,
-        behavior: SnackBarBehavior.floating,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Text(
-          'Generating Goal Calendar for "${_goalCtrl.text}"…',
-          style: TextStyle(color: palette.primaryLight),
-        ),
+    final startDate = DateTime(
+      int.parse(_startYearCtrl.text),
+      int.parse(_startMonthCtrl.text),
+      int.parse(_startDayCtrl.text),
+    );
+    final endDate = DateTime(
+      int.parse(_deadlineYearCtrl.text),
+      int.parse(_deadlineMonthCtrl.text),
+      int.parse(_deadlineDayCtrl.text),
+    );
+    final wallpaperData = WallpaperData(
+      calendarType: CalendarType.goal,
+      wallpaperTheme: widget.wallpaperTheme,
+      startDate: startDate,
+      endDate: endDate,
+      label: _goalCtrl.text,
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WallpaperPreviewScreen(data: wallpaperData),
       ),
     );
   }

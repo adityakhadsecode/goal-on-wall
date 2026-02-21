@@ -6,6 +6,7 @@ import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/customize_shared_widgets.dart';
 import '../models/wallpaper_config.dart';
+import 'wallpaper_preview_screen.dart';
 
 class LifeCustomizeScreen extends StatefulWidget {
   const LifeCustomizeScreen({super.key, required this.wallpaperTheme});
@@ -50,15 +51,28 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: palette.cardBackground,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Text(
-          'Generating Life Calendar wallpaper…',
-          style: TextStyle(color: palette.primaryLight),
-        ),
+    final birthDate = DateTime(
+      int.parse(_yearCtrl.text),
+      int.parse(_monthCtrl.text),
+      int.parse(_dayCtrl.text),
+    );
+    // Life calendar: birthdate → 80th birthday
+    final endDate = DateTime(
+      birthDate.year + 80,
+      birthDate.month,
+      birthDate.day,
+    );
+    final wallpaperData = WallpaperData(
+      calendarType: CalendarType.life,
+      wallpaperTheme: widget.wallpaperTheme,
+      startDate: birthDate,
+      endDate: endDate,
+      label: 'Life Calendar',
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WallpaperPreviewScreen(data: wallpaperData),
       ),
     );
   }

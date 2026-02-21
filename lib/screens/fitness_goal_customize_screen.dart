@@ -6,6 +6,7 @@ import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/customize_shared_widgets.dart';
 import '../models/wallpaper_config.dart';
+import 'wallpaper_preview_screen.dart';
 
 class FitnessGoalCustomizeScreen extends StatefulWidget {
   const FitnessGoalCustomizeScreen({super.key, required this.wallpaperTheme});
@@ -68,16 +69,30 @@ class _FitnessGoalCustomizeScreenState
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: palette.cardBackground,
-        behavior: SnackBarBehavior.floating,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Text(
-          'Generating Fitness Goal wallpaper for "${_goalCtrl.text}"…',
-          style: TextStyle(color: palette.primaryLight),
-        ),
+    final startDate = DateTime(
+      int.parse(_startYearCtrl.text),
+      int.parse(_startMonthCtrl.text),
+      int.parse(_startDayCtrl.text),
+    );
+    final endDate = DateTime(
+      int.parse(_eventYearCtrl.text),
+      int.parse(_eventMonthCtrl.text),
+      int.parse(_eventDayCtrl.text),
+    );
+    final label = _targetCtrl.text.trim().isNotEmpty
+        ? '${_goalCtrl.text} · ${_targetCtrl.text}'
+        : _goalCtrl.text;
+    final wallpaperData = WallpaperData(
+      calendarType: CalendarType.fitnessGoal,
+      wallpaperTheme: widget.wallpaperTheme,
+      startDate: startDate,
+      endDate: endDate,
+      label: label,
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WallpaperPreviewScreen(data: wallpaperData),
       ),
     );
   }

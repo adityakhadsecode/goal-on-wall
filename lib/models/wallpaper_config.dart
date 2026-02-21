@@ -1,4 +1,81 @@
-/// Shared enums for the wallpaper creation flow.
+/// Shared enums and data model for the wallpaper creation flow.
 enum CalendarType { life, year, goal, productLaunch, fitnessGoal }
 
 enum WallpaperTheme { flow, dots }
+
+/// All the information needed to render any wallpaper type.
+class WallpaperData {
+  const WallpaperData({
+    required this.calendarType,
+    required this.wallpaperTheme,
+    required this.startDate,
+    required this.endDate,
+    this.label,
+  });
+
+  final CalendarType calendarType;
+  final WallpaperTheme wallpaperTheme;
+
+  /// First day of the period (inclusive).
+  final DateTime startDate;
+
+  /// Last day of the period (inclusive).
+  final DateTime endDate;
+
+  /// Optional human-readable label (goal name, product name, etc.).
+  final String? label;
+
+  // ── Computed helpers ─────────────────────────────────────────
+
+  /// Total number of days in the period.
+  int get totalDays {
+    final d = _dateOnly(endDate).difference(_dateOnly(startDate)).inDays + 1;
+    return d < 1 ? 1 : d;
+  }
+
+  /// How many days have elapsed from startDate (0 = today is day 0 / first dot).
+  int get elapsedDays {
+    final today = _dateOnly(DateTime.now());
+    final start = _dateOnly(startDate);
+    final diff = today.difference(start).inDays;
+    return diff.clamp(0, totalDays);
+  }
+
+  /// Index of today's dot (same as elapsedDays but capped at totalDays - 1).
+  int get todayIndex => elapsedDays.clamp(0, totalDays - 1);
+
+  /// 0.0 – 1.0 progress.
+  double get progress => elapsedDays / totalDays;
+
+  /// Days remaining until (and including) endDate.
+  int get daysLeft {
+    final today = _dateOnly(DateTime.now());
+    final end = _dateOnly(endDate);
+    final diff = end.difference(today).inDays;
+    return diff < 0 ? 0 : diff;
+  }
+
+  /// Percentage elapsed, 0–100 integer.
+  int get percentElapsed => (progress * 100).round().clamp(0, 100);
+
+  /// Bottom caption string, e.g. "341d left · 6%"
+  String get caption => '${daysLeft}d left  ·  $percentElapsed%';
+
+  /// Strip H/M/S so date arithmetic is clean.
+  static DateTime _dateOnly(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day);
+
+  // ── Factory helpers for types that don't need custom dates ───
+
+  /// Year Calendar: always Jan 1 → Dec 31 of the current year.
+  factory WallpaperData.yearCalendar({WallpaperTheme wallpaperTheme = WallpaperTheme.dots}) {
+    final now = DateTime.now();
+    return WallpaperData(
+      calendarType: CalendarType.year,
+      wallpaperTheme: wallpaperTheme,
+      startDate: DateTime(now.year, 1, 1),
+      endDate: DateTime(now.year, 12, 31),
+      label: '${now.year}',
+    );
+  }
+}

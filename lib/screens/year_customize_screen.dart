@@ -6,6 +6,7 @@ import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import '../widgets/customize_shared_widgets.dart';
 import '../models/wallpaper_config.dart';
+import 'wallpaper_preview_screen.dart';
 
 enum YearLayoutStyle { days, months, quarters }
 
@@ -22,15 +23,13 @@ class _YearCustomizeScreenState extends State<YearCustomizeScreen> {
   YearLayoutStyle _selected = YearLayoutStyle.days;
 
   void _generate(AppColorPalette palette) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: palette.cardBackground,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        content: Text(
-          'Generating Year Calendar — ${_selected.name} layout…',
-          style: TextStyle(color: palette.primaryLight),
-        ),
+    final wallpaperData = WallpaperData.yearCalendar(
+      wallpaperTheme: widget.wallpaperTheme,
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WallpaperPreviewScreen(data: wallpaperData),
       ),
     );
   }
