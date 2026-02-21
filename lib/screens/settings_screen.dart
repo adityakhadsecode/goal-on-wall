@@ -761,15 +761,21 @@ class _SheetDateField extends StatelessWidget {
           onChanged: (val) {
             final n = int.tryParse(val);
             if (n != null) {
-              final clamped = n.clamp(minValue ?? 1, maxValue);
-              if (clamped != n || val.length == maxLength) {
+              final isComplete = val.length == maxLength;
+              final isTooHigh = n > maxValue;
+
+              if (isTooHigh || isComplete) {
+                final clamped = n.clamp(minValue ?? 1, maxValue);
                 final s = maxLength == 4
                     ? clamped.toString()
                     : clamped.toString().padLeft(2, '0');
-                controller.value = TextEditingValue(
-                  text: s,
-                  selection: TextSelection.collapsed(offset: s.length),
-                );
+
+                if (s != val) {
+                  controller.value = TextEditingValue(
+                    text: s,
+                    selection: TextSelection.collapsed(offset: s.length),
+                  );
+                }
               }
             }
             onChanged(controller.text);

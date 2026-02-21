@@ -24,8 +24,8 @@ void main() async {
     'daily-wallpaper-refresh',
     refreshWallpaperTask,
     frequency: const Duration(hours: 24),
-    constraints: Constraints(networkType: NetworkType.not_required),
-    existingWorkPolicy: ExistingWorkPolicy.keep,
+    constraints: Constraints(networkType: NetworkType.notRequired),
+    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
   );
 
   runApp(const GoalOnWallApp());

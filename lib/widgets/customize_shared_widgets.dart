@@ -36,15 +36,14 @@ class _ClampingFormatter extends TextInputFormatter {
     final truncated =
         digits.length > totalLength ? digits.substring(0, totalLength) : digits;
 
-    // Only clamp once the full length is entered
-    if (truncated.length == totalLength) {
-      final value = int.tryParse(truncated);
-      if (value != null) {
+    final value = int.tryParse(truncated);
+    if (value != null) {
+      final isComplete = truncated.length == totalLength;
+      final isTooHigh = value > maxValue;
+
+      if (isTooHigh || isComplete) {
         final clamped = value.clamp(minValue, maxValue);
-        // Pad to totalLength (e.g. day "1" → "01" only if clamped changed)
-        final text = clamped != value
-            ? clamped.toString().padLeft(totalLength, '0')
-            : truncated;
+        final text = clamped.toString().padLeft(totalLength, '0');
         return TextEditingValue(
           text: text,
           selection: TextSelection.collapsed(offset: text.length),
