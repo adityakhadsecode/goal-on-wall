@@ -78,6 +78,9 @@ Home Screen
 - **Provider** — lightweight state management for theming
 - **Custom Painters** — hand-drawn wallpaper previews (Flow path, Dot grid)
 - **Glassmorphism UI** — organic dark design language with `OrganicBackground`, `GlassCard`
+- **WorkManager** — daily periodic background refresh of lock screen
+- **Wallpaper Manager** — native platform integration for setting Android wallpaper
+- **Shared Preferences** — persistent storage for wallpaper configurations
 
 ---
 
@@ -103,9 +106,14 @@ lib/
 └── widgets/
     ├── organic_background.dart     # Radial gradient + floating orbs
     ├── glass_card.dart             # Frosted glass card
-    ├── customize_shared_widgets.dart  # Shared: Breadcrumb, DateInputField, GenerateButton
+    ├── customize_shared_widgets.dart  # Shared: Breadcrumb, DateInputField (with validation), GenerateButton
     ├── main_scaffold.dart
-    └── dot_grid.dart
+    ├── dot_grid.dart
+    └── glass_card.dart
+├── services/
+    ├── background_task.dart        # WorkManager dispatcher for daily refresh
+    ├── wallpaper_service.dart     # PNG rendering & Android WallpaperManager
+    └── wallpaper_storage.dart     # SharedPreferences config persistence
 ```
 
 ---
@@ -145,8 +153,10 @@ flutter analyze   # Should report: No issues found!
 
 ## 🗺️ Roadmap
 
-- [ ] Actual wallpaper image generation (canvas → PNG export)
-- [ ] Android lock screen auto-set via platform channel
+- [x] Actual wallpaper image generation (canvas → PNG export)
+- [x] Android lock screen auto-set via platform channel
+- [x] Date validation for all calendar inputs (clamped ranges)
+- [x] Daily automatic background refresh via WorkManager
 - [ ] iOS Shortcuts integration
 - [ ] More visual styles (Heatmap, Arc, Timeline)
 - [ ] iCloud / Google Drive backup of wallpaper configs

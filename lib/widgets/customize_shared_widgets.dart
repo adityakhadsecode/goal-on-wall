@@ -1,9 +1,71 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_theme.dart';
 
 // ══════════════════════════════════════════════════════════════
 // SHARED WIDGETS FOR ALL CUSTOMIZATION SCREENS
 // ══════════════════════════════════════════════════════════════
+
+/// Clamps numeric input to [minValue, maxValue] once [totalLength] digits entered.
+class _ClampingFormatter extends TextInputFormatter {
+  const _ClampingFormatter({
+    required this.totalLength,
+    required this.maxValue,
+    this.minValue = 1,
+  });
+
+  final int totalLength;
+  final int maxValue;
+  final int minValue;
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    // Strip non-digits
+    final digits = newValue.text.replaceAll(RegExp(r'[^\d]'), '');
+    if (digits.isEmpty) {
+      return newValue.copyWith(
+        text: '',
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+    }
+
+    // Truncate to totalLength
+    final truncated =
+        digits.length > totalLength ? digits.substring(0, totalLength) : digits;
+
+    // Only clamp once the full length is entered
+    if (truncated.length == totalLength) {
+      final value = int.tryParse(truncated);
+      if (value != null) {
+        final clamped = value.clamp(minValue, maxValue);
+        // Pad to totalLength (e.g. day "1" → "01" only if clamped changed)
+        final text = clamped != value
+            ? clamped.toString().padLeft(totalLength, '0')
+            : truncated;
+        return TextEditingValue(
+          text: text,
+          selection: TextSelection.collapsed(offset: text.length),
+        );
+      }
+    }
+
+    return newValue.copyWith(
+      text: truncated,
+      selection: TextSelection.collapsed(offset: truncated.length),
+    );
+  }
+}
+
+// ── Utility ───────────────────────────────────────────────────
+
+/// Returns the number of days in the given [month] of [year].
+int daysInMonth(int year, int month) {
+  final m = month.clamp(1, 12);
+  return DateTime(year, m + 1, 0).day;
+}
 
 /// Breadcrumb navigation row, e.g. Life Calendar › The Flow › Customize
 class CustomizeBreadcrumb extends StatelessWidget {
@@ -35,6 +97,9 @@ class CustomizeBreadcrumb extends StatelessWidget {
 }
 
 /// DD / MM / YYYY numeric input field with a labelled header.
+///
+/// Pass [maxValue] to clamp the entered number (e.g. 12 for month, 31 for day).
+/// Pass [minValue] to set the lower limit (default 1).
 class DateInputField extends StatelessWidget {
   const DateInputField({
     super.key,
@@ -44,6 +109,8 @@ class DateInputField extends StatelessWidget {
     required this.maxLength,
     required this.palette,
     required this.onChanged,
+    this.maxValue,
+    this.minValue = 1,
   });
 
   final TextEditingController controller;
@@ -52,9 +119,21 @@ class DateInputField extends StatelessWidget {
   final int maxLength;
   final AppColorPalette palette;
   final ValueChanged<String> onChanged;
+  final int? maxValue;
+  final int minValue;
 
   @override
   Widget build(BuildContext context) {
+    final formatters = <TextInputFormatter>[
+      FilteringTextInputFormatter.digitsOnly,
+      if (maxValue != null)
+        _ClampingFormatter(
+          totalLength: maxLength,
+          maxValue: maxValue!,
+          minValue: minValue,
+        ),
+    ];
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -82,6 +161,7 @@ class DateInputField extends StatelessWidget {
             maxLength: maxLength,
             textAlign: TextAlign.center,
             onChanged: onChanged,
+            inputFormatters: formatters,
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w600,

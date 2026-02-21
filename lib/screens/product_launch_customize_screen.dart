@@ -53,6 +53,18 @@ class _ProductLaunchCustomizeScreenState
       _launchMonthCtrl.text.length == 2 &&
       _launchDayCtrl.text.length == 2;
 
+  int get _startMaxDay {
+    final y = int.tryParse(_startYearCtrl.text) ?? DateTime.now().year;
+    final m = (int.tryParse(_startMonthCtrl.text) ?? 1).clamp(1, 12);
+    return DateTime(y, m + 1, 0).day;
+  }
+
+  int get _launchMaxDay {
+    final y = int.tryParse(_launchYearCtrl.text) ?? DateTime.now().year;
+    final m = (int.tryParse(_launchMonthCtrl.text) ?? 1).clamp(1, 12);
+    return DateTime(y, m + 1, 0).day;
+  }
+
   void _generate(AppColorPalette palette) {
     if (!_isComplete) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -197,6 +209,8 @@ class _ProductLaunchCustomizeScreenState
                               hint: 'YYYY',
                               label: 'Year',
                               maxLength: 4,
+                              maxValue: 2099,
+                              minValue: 1900,
                               palette: palette,
                               onChanged: (_) => setState(() {}),
                             ),
@@ -208,6 +222,7 @@ class _ProductLaunchCustomizeScreenState
                               hint: 'MM',
                               label: 'Month',
                               maxLength: 2,
+                              maxValue: 12,
                               palette: palette,
                               onChanged: (_) => setState(() {}),
                             ),
@@ -219,6 +234,7 @@ class _ProductLaunchCustomizeScreenState
                               hint: 'DD',
                               label: 'Day',
                               maxLength: 2,
+                              maxValue: _startMaxDay,
                               palette: palette,
                               onChanged: (_) => setState(() {}),
                             ),
@@ -253,6 +269,8 @@ class _ProductLaunchCustomizeScreenState
                               hint: 'YYYY',
                               label: 'Year',
                               maxLength: 4,
+                              maxValue: 2099,
+                              minValue: 1900,
                               palette: palette,
                               onChanged: (_) => setState(() {}),
                             ),
@@ -264,6 +282,7 @@ class _ProductLaunchCustomizeScreenState
                               hint: 'MM',
                               label: 'Month',
                               maxLength: 2,
+                              maxValue: 12,
                               palette: palette,
                               onChanged: (_) => setState(() {}),
                             ),
@@ -275,6 +294,7 @@ class _ProductLaunchCustomizeScreenState
                               hint: 'DD',
                               label: 'Day',
                               maxLength: 2,
+                              maxValue: _launchMaxDay,
                               palette: palette,
                               onChanged: (_) => setState(() {}),
                             ),

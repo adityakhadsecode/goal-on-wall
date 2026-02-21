@@ -35,6 +35,12 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
       _monthCtrl.text.length == 2 &&
       _yearCtrl.text.length == 4;
 
+  int get _birthMaxDay {
+    final y = int.tryParse(_yearCtrl.text) ?? DateTime.now().year;
+    final m = (int.tryParse(_monthCtrl.text) ?? 1).clamp(1, 12);
+    return DateTime(y, m + 1, 0).day;
+  }
+
   void _generate(AppColorPalette palette) {
     if (!_isComplete) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -156,6 +162,7 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
                               hint: 'DD',
                               label: 'Day',
                               maxLength: 2,
+                              maxValue: _birthMaxDay,
                               palette: palette,
                               onChanged: (_) => setState(() {}),
                             ),
@@ -167,6 +174,7 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
                               hint: 'MM',
                               label: 'Month',
                               maxLength: 2,
+                              maxValue: 12,
                               palette: palette,
                               onChanged: (_) => setState(() {}),
                             ),
@@ -179,6 +187,8 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
                               hint: 'YYYY',
                               label: 'Year',
                               maxLength: 4,
+                              maxValue: 2099,
+                              minValue: 1900,
                               palette: palette,
                               onChanged: (_) => setState(() {}),
                             ),
