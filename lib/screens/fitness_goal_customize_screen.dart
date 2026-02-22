@@ -9,9 +9,14 @@ import '../models/wallpaper_config.dart';
 import 'wallpaper_preview_screen.dart';
 
 class FitnessGoalCustomizeScreen extends StatefulWidget {
-  const FitnessGoalCustomizeScreen({super.key, required this.wallpaperTheme});
+  const FitnessGoalCustomizeScreen({
+    super.key,
+    required this.wallpaperTheme,
+    this.initialData,
+  });
 
   final WallpaperTheme wallpaperTheme;
+  final WallpaperData? initialData;
 
   @override
   State<FitnessGoalCustomizeScreen> createState() =>
@@ -35,6 +40,24 @@ class _FitnessGoalCustomizeScreenState
 
   // Validation
   bool _dateOrderError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialData != null) {
+      final data = widget.initialData!;
+      _goalCtrl.text = data.label ?? '';
+      _targetCtrl.text = ''; // We don't have a direct target field in WallpaperData, so leave it or use a default if available.
+      
+      _startDayCtrl.text = data.startDate.day.toString().padLeft(2, '0');
+      _startMonthCtrl.text = data.startDate.month.toString().padLeft(2, '0');
+      _startYearCtrl.text = data.startDate.year.toString();
+
+      _eventDayCtrl.text = data.endDate.day.toString().padLeft(2, '0');
+      _eventMonthCtrl.text = data.endDate.month.toString().padLeft(2, '0');
+      _eventYearCtrl.text = data.endDate.year.toString();
+    }
+  }
 
   @override
   void dispose() {

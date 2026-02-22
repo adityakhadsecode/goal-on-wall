@@ -61,6 +61,16 @@ class WallpaperData {
   /// Bottom caption string, e.g. "341d left · 6%"
   String get caption => '${daysLeft}d left  ·  $percentElapsed%';
 
+  /// Formatted text summary for sharing.
+  String get shareText {
+    final goalLabel = label ?? 'My Goal';
+    return 'Check out my progress! ✨\n\n'
+        'Goal: $goalLabel\n'
+        'Status: $elapsedDays of $totalDays days passed\n'
+        'Remaining: $daysLeft days ($percentElapsed% done)\n\n'
+        'Sent via Goal on Wall 🎯';
+  }
+
   /// Strip H/M/S so date arithmetic is clean.
   static DateTime _dateOnly(DateTime dt) =>
       DateTime(dt.year, dt.month, dt.day);

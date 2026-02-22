@@ -9,9 +9,14 @@ import '../models/wallpaper_config.dart';
 import 'wallpaper_preview_screen.dart';
 
 class ProductLaunchCustomizeScreen extends StatefulWidget {
-  const ProductLaunchCustomizeScreen({super.key, required this.wallpaperTheme});
+  const ProductLaunchCustomizeScreen({
+    super.key,
+    required this.wallpaperTheme,
+    this.initialData,
+  });
 
   final WallpaperTheme wallpaperTheme;
+  final WallpaperData? initialData;
 
   @override
   State<ProductLaunchCustomizeScreen> createState() =>
@@ -34,6 +39,23 @@ class _ProductLaunchCustomizeScreenState
 
   // Validation
   bool _dateOrderError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialData != null) {
+      final data = widget.initialData!;
+      _productCtrl.text = data.label ?? '';
+
+      _startDayCtrl.text = data.startDate.day.toString().padLeft(2, '0');
+      _startMonthCtrl.text = data.startDate.month.toString().padLeft(2, '0');
+      _startYearCtrl.text = data.startDate.year.toString();
+
+      _launchDayCtrl.text = data.endDate.day.toString().padLeft(2, '0');
+      _launchMonthCtrl.text = data.endDate.month.toString().padLeft(2, '0');
+      _launchYearCtrl.text = data.endDate.year.toString();
+    }
+  }
 
   @override
   void dispose() {

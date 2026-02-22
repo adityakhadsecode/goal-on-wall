@@ -5,6 +5,15 @@ import '../theme/theme_provider.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import 'wallpaper_type_screen.dart';
+import '../services/wallpaper_storage.dart';
+import '../models/wallpaper_config.dart';
+import 'life_customize_screen.dart';
+import 'year_customize_screen.dart';
+import 'goal_customize_screen.dart';
+import 'product_launch_customize_screen.dart';
+import 'fitness_goal_customize_screen.dart';
+import 'analytics_screen.dart';
+import '../providers/wallpaper_provider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -107,8 +116,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<ThemeProvider>().palette;
-    final yearPct = (_yearProgress * 100).round();
+    final wpProvider = context.watch<WallpaperProvider>();
+    final activeWp = wpProvider.activeWallpaper;
     final size = MediaQuery.of(context).size;
+
+    // Use active wallpaper data if available, otherwise fallback to local Year progress
+    final double progress = activeWp?.percentElapsed.toDouble() ?? (_yearProgress * 100);
+    final int progressPct = progress.round();
+    final int elapsedDaysValue = activeWp?.elapsedDays ?? _daysPassed;
+    final int daysRemainingValue = activeWp?.daysLeft ?? _daysRemaining;
+    final double progressFactor = (activeWp != null) 
+      ? (activeWp.percentElapsed / 100.0) 
+      : _yearProgress;
 
     return OrganicBackground(
       child: SafeArea(
@@ -134,9 +153,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 // ── ACTIVE WALLPAPER CARD ─────────────────────
                 _WallpaperPreviewCard(
                   palette: palette,
-                  yearProgress: _yearProgress,
-                  yearPct: yearPct,
-                  daysPassed: _daysPassed,
+                  yearProgress: progressFactor,
+                  yearPct: progressPct,
+                  daysPassed: elapsedDaysValue,
                   floatController: _floatingController,
                   riverController: _riverController,
                   cardHeight: size.height * 0.40,
@@ -149,16 +168,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
                 const SizedBox(height: 20),
 
-                // ── LIFE SNAPSHOT ─────────────────────────────
-                _LifeSnapshot(
+                // ── MY GOAL PROGRESS ──────────────────────────
+                _MyGoalProgress(
                   palette: palette,
-                  weekProgress: _weekProgress,
-                  dayProgress: _dayProgress,
-                  daysRemaining: _daysRemaining,
+                  progressPct: progressPct,
+                  progressFactor: progressFactor,
+                  daysPassed: elapsedDaysValue,
+                  daysRemaining: daysRemainingValue,
                   insightText: _insights[_insightIndex],
                   insightFade: _insightFadeController,
-                  weekPct: _pct(_weekProgress),
-                  dayPct: _pct(_dayProgress),
                 ),
               ],
             ),
@@ -477,14 +495,70 @@ class _ActionButtons extends StatelessWidget {
           label: 'Customize Current Wallpaper',
           icon: Icons.tune_rounded,
           palette: palette,
-          onTap: () {},
+          onTap: () async {
+            final savedConfig = await WallpaperStorage.load();
+            if (savedConfig == null) {
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('No active wallpaper found.'),
+                    behavior: SnackBarBehavior.floating,
+                  ),
+                );
+              }
+              return;
+            }
+            if (!context.mounted) return;
+
+            final data = savedConfig.data;
+            Widget screen;
+            switch (data.calendarType) {
+              case CalendarType.life:
+                screen = LifeCustomizeScreen(
+                    wallpaperTheme: data.wallpaperTheme, initialData: data);
+                break;
+              case CalendarType.year:
+                screen = YearCustomizeScreen(
+                    wallpaperTheme: data.wallpaperTheme, initialData: data);
+                break;
+              case CalendarType.goal:
+                screen = GoalCustomizeScreen(
+                    wallpaperTheme: data.wallpaperTheme, initialData: data);
+                break;
+              case CalendarType.productLaunch:
+                screen = ProductLaunchCustomizeScreen(
+                    wallpaperTheme: data.wallpaperTheme, initialData: data);
+                break;
+              case CalendarType.fitnessGoal:
+                screen = FitnessGoalCustomizeScreen(
+                    wallpaperTheme: data.wallpaperTheme, initialData: data);
+                break;
+            }
+            Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+          },
         ),
         const SizedBox(height: 12),
         _GlassButton(
           label: 'View Current Progress',
           icon: Icons.bar_chart_rounded,
           palette: palette,
-          onTap: () {},
+          onTap: () async {
+            final savedConfig = await WallpaperStorage.load();
+            if (savedConfig != null && context.mounted) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => AnalyticsScreen(data: savedConfig.data)),
+              );
+            } else if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('No active wallpaper found.'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+          },
         ),
       ],
     );
@@ -617,28 +691,26 @@ class _GlassButton extends StatelessWidget {
 }
 
 // ══════════════════════════════════════════════════════════════
-// LIFE SNAPSHOT PANEL
+// MY GOAL PROGRESS PANEL
 // ══════════════════════════════════════════════════════════════
-class _LifeSnapshot extends StatelessWidget {
-  const _LifeSnapshot({
+class _MyGoalProgress extends StatelessWidget {
+  const _MyGoalProgress({
     required this.palette,
-    required this.weekProgress,
-    required this.dayProgress,
+    required this.progressPct,
+    required this.progressFactor,
+    required this.daysPassed,
     required this.daysRemaining,
     required this.insightText,
     required this.insightFade,
-    required this.weekPct,
-    required this.dayPct,
   });
 
   final dynamic palette;
-  final double weekProgress;
-  final double dayProgress;
+  final int progressPct;
+  final double progressFactor;
+  final int daysPassed;
   final int daysRemaining;
   final String insightText;
   final AnimationController insightFade;
-  final String weekPct;
-  final String dayPct;
 
   @override
   Widget build(BuildContext context) {
@@ -659,7 +731,7 @@ class _LifeSnapshot extends StatelessWidget {
               ),
               const SizedBox(width: 7),
               Text(
-                'LIFE SNAPSHOT',
+                'MY GOAL PROGRESS',
                 style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
@@ -678,9 +750,9 @@ class _LifeSnapshot extends StatelessWidget {
             children: [
               Expanded(
                 child: _SnapshotStat(
-                  label: 'WEEK',
-                  value: weekPct,
-                  progress: weekProgress,
+                  label: 'COMPLETE',
+                  value: '$progressPct%',
+                  progress: progressFactor,
                   accent: palette.primaryLight as Color,
                   palette: palette,
                 ),
@@ -688,9 +760,9 @@ class _LifeSnapshot extends StatelessWidget {
               _SnapDivider(),
               Expanded(
                 child: _SnapshotStat(
-                  label: 'DAY',
-                  value: dayPct,
-                  progress: dayProgress,
+                  label: 'PASSED',
+                  value: '$daysPassed',
+                  progress: 1.0, // Fixed full since it's just a count
                   accent: palette.accent as Color,
                   palette: palette,
                 ),

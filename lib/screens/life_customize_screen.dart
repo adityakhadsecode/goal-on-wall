@@ -11,9 +11,14 @@ import '../services/user_prefs.dart';
 import 'wallpaper_preview_screen.dart';
 
 class LifeCustomizeScreen extends StatefulWidget {
-  const LifeCustomizeScreen({super.key, required this.wallpaperTheme});
+  const LifeCustomizeScreen({
+    super.key,
+    required this.wallpaperTheme,
+    this.initialData,
+  });
 
   final WallpaperTheme wallpaperTheme;
+  final WallpaperData? initialData;
 
   @override
   State<LifeCustomizeScreen> createState() => _LifeCustomizeScreenState();
@@ -35,7 +40,16 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
   @override
   void initState() {
     super.initState();
-    _loadSavedDate();
+    if (widget.initialData != null) {
+      final date = widget.initialData!.startDate;
+      _dayCtrl.text = date.day.toString().padLeft(2, '0');
+      _monthCtrl.text = date.month.toString().padLeft(2, '0');
+      _yearCtrl.text = date.year.toString();
+      _useSaved = false;
+      _loadingPrefs = false;
+    } else {
+      _loadSavedDate();
+    }
   }
 
   Future<void> _loadSavedDate() async {

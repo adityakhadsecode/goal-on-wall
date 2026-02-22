@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:path_provider/path_provider.dart';
 import '../theme/theme_provider.dart';
 import '../models/wallpaper_config.dart';
 import '../providers/wallpaper_provider.dart';
@@ -19,6 +21,7 @@ class WallpaperPreviewScreen extends StatefulWidget {
 
 class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
   bool _isSetting = false;
+  bool _isSharing = false;
 
   Future<void> _setWallpaper(dynamic palette) async {
     setState(() => _isSetting = true);
@@ -27,6 +30,11 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
       final labelColor = palette.primaryLight as Color;
       final monthLabelColor = palette.textMuted as Color;
 
+      // Get native resolution
+      final physicalSize = View.of(context).physicalSize;
+      final width = physicalSize.width;
+      final height = physicalSize.height;
+
       final pngBytes = await WallpaperService.renderToPng(
         data: widget.data,
         pastColor: Colors.white,
@@ -34,6 +42,8 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
         futureColor: const Color(0x1FFFFFFF),
         labelColor: labelColor,
         monthLabelColor: monthLabelColor,
+        width: width,
+        height: height,
       );
 
       await WallpaperService.setAsLockScreen(pngBytes);
@@ -44,12 +54,15 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
         todayColor: todayColor.toARGB32(),
         labelColor: labelColor.toARGB32(),
         monthLabelColor: monthLabelColor.toARGB32(),
+        width: width,
+        height: height,
       );
 
-      // Add to memory provider
+      // Add to memory provider and set as active
       if (mounted) {
-        Provider.of<WallpaperProvider>(context, listen: false)
-            .addWallpaper(widget.data);
+        final provider = Provider.of<WallpaperProvider>(context, listen: false);
+        provider.addWallpaper(widget.data);
+        provider.setActiveWallpaper(widget.data);
       }
 
       if (mounted) {
@@ -57,33 +70,21 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
           SnackBar(
             backgroundColor: const Color(0xFF1A1A1A),
             behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-            content: Row(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            content: const Row(
               children: [
-                Icon(Icons.check_circle_rounded,
-                    color: palette.primaryLight as Color, size: 18),
-                const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    'Lock screen updated! Refreshes automatically every day.',
-                    style: TextStyle(color: Colors.white70, fontSize: 13),
-                  ),
-                ),
+                Icon(Icons.check_circle_rounded, color: Colors.greenAccent, size: 20),
+                SizedBox(width: 12),
+                Text('Lock screen updated successfully!'),
               ],
             ),
           ),
         );
       }
-    } on WallpaperServiceException catch (e) {
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: const Color(0xFF1A1A1A),
-            behavior: SnackBarBehavior.floating,
-            content: Text(e.message,
-                style: const TextStyle(color: Colors.white70)),
-          ),
+          SnackBar(content: Text('Error: ${e.toString()}')),
         );
       }
     } finally {
@@ -91,9 +92,52 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
     }
   }
 
+  Future<void> _shareWallpaper(dynamic palette) async {
+    setState(() => _isSharing = true);
+    try {
+      final todayColor = palette.accent as Color;
+      final labelColor = palette.primaryLight as Color;
+      final monthLabelColor = palette.textMuted as Color;
+
+      // Get native resolution for sharing too
+      final physicalSize = View.of(context).physicalSize;
+      final width = physicalSize.width;
+      final height = physicalSize.height;
+
+      final pngBytes = await WallpaperService.renderToPng(
+        data: widget.data,
+        pastColor: Colors.white,
+        todayColor: todayColor,
+        futureColor: const Color(0x1FFFFFFF),
+        labelColor: labelColor,
+        monthLabelColor: monthLabelColor,
+        width: width,
+        height: height,
+      );
+
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/my_progress.png');
+      await file.writeAsBytes(pngBytes);
+
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: widget.data.shareText,
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sharing failed: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSharing = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final palette = context.watch<ThemeProvider>().palette;
+    final themeProvider = context.watch<ThemeProvider>();
+    final palette = themeProvider.palette;
 
     // Colors matching the reference design
     const bgColor = Color(0xFF0D0D0D);
@@ -103,16 +147,16 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
 
     final painter = DotWallpaperPainter(
       data: widget.data,
-      pastColor: pastColor,
-      todayColor: todayColor,
-      futureColor: futureColor,
-      bgColor: bgColor,
+      pastColor: Colors.white,
+      todayColor: palette.accent,
+      futureColor: Colors.white.withValues(alpha: 0.12),
+      bgColor: const Color(0xFF0D0D0D),
       labelColor: palette.primaryLight,
       monthLabelColor: palette.textMuted,
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF0A0A0A),
+      backgroundColor: Colors.black,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -145,21 +189,23 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
           ],
         ),
       ),
-      body: Column(
+      body: Stack(
         children: [
-          // ── Wallpaper preview ──────────────────────────────
-          Expanded(
-            child: Center(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                child: AspectRatio(
-                  aspectRatio: 9 / 19.5,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(28),
-                    child: CustomPaint(
-                      painter: painter,
-                      child: const SizedBox.expand(),
+          // ── Preview Background ──────────────────────────────
+          Positioned.fill(
+            child: Container(
+              color: const Color(0xFF0D0D0D),
+              child: Hero(
+                tag: 'wallpaper_preview',
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: 9 / 19.5,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(28),
+                      child: CustomPaint(
+                        painter: painter,
+                        child: const SizedBox.expand(),
+                      ),
                     ),
                   ),
                 ),
@@ -173,7 +219,7 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
               child: Row(
                 children: [
-                  // Share button (stub)
+                  // Share button
                   Container(
                     width: 52,
                     height: 52,
@@ -183,18 +229,22 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
                       border: Border.all(
                           color: Colors.white.withValues(alpha: 0.10)),
                     ),
-                    child: IconButton(
-                      icon: const Icon(Icons.share_rounded,
-                          color: Colors.white70, size: 22),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Share coming soon!'),
-                            behavior: SnackBarBehavior.floating,
+                    child: _isSharing
+                        ? const Center(
+                            child: SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white70,
+                              ),
+                            ),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.share_rounded,
+                                color: Colors.white70, size: 22),
+                            onPressed: () => _shareWallpaper(palette),
                           ),
-                        );
-                      },
-                    ),
                   ),
 
                   const SizedBox(width: 14),

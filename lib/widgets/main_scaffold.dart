@@ -7,6 +7,7 @@ import '../screens/life_calendar_screen.dart';
 import '../screens/year_calendar_screen.dart';
 import '../screens/settings_screen.dart';
 import '../screens/goal_calendar_screen.dart';
+import '../screens/wallpaper_type_screen.dart';
 
 class MainScaffold extends StatefulWidget {
   const MainScaffold({super.key});
@@ -116,7 +117,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const WallpaperTypeScreen(), // Navigate to type screen first or direct?
+                      builder: (_) => WallpaperTypeScreen(), // Navigate to type screen first or direct?
                     ),
                   );
                 },
@@ -131,7 +132,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const WallpaperTypeScreen(),
+                      builder: (_) => WallpaperTypeScreen(),
                     ),
                   );
                 },

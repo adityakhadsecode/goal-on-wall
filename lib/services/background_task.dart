@@ -26,6 +26,8 @@ void callbackDispatcher() {
           futureColor: const Color(0x1FFFFFFF),
           labelColor: Color(saved.labelColor),
           monthLabelColor: Color(saved.monthLabelColor),
+          width: saved.width,
+          height: saved.height,
         );
 
         await WallpaperService.setAsLockScreen(pngBytes);

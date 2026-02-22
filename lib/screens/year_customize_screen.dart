@@ -11,9 +11,14 @@ import 'wallpaper_preview_screen.dart';
 enum YearLayoutStyle { days, months, quarters }
 
 class YearCustomizeScreen extends StatefulWidget {
-  const YearCustomizeScreen({super.key, required this.wallpaperTheme});
+  const YearCustomizeScreen({
+    super.key,
+    required this.wallpaperTheme,
+    this.initialData,
+  });
 
   final WallpaperTheme wallpaperTheme;
+  final WallpaperData? initialData;
 
   @override
   State<YearCustomizeScreen> createState() => _YearCustomizeScreenState();

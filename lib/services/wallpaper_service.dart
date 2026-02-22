@@ -11,9 +11,6 @@ import '../painters/dot_wallpaper_painter.dart';
 
 /// Renders [WallpaperData] to a PNG image and sets it as the Android lock screen.
 class WallpaperService {
-  static const double _width = 1080;
-  static const double _height = 2340;
-
   /// Renders the dot wallpaper to raw PNG bytes at phone resolution.
   static Future<Uint8List> renderToPng({
     required WallpaperData data,
@@ -22,12 +19,14 @@ class WallpaperService {
     required Color futureColor,
     required Color labelColor,
     required Color monthLabelColor,
+    required double width,
+    required double height,
     Color bgColor = const Color(0xFF0D0D0D),
   }) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(
       recorder,
-      Rect.fromLTWH(0, 0, _width, _height),
+      Rect.fromLTWH(0, 0, width, height),
     );
 
     final painter = DotWallpaperPainter(
@@ -40,10 +39,10 @@ class WallpaperService {
       monthLabelColor: monthLabelColor,
     );
 
-    painter.paint(canvas, const Size(_width, _height));
+    painter.paint(canvas, Size(width, height));
 
     final picture = recorder.endRecording();
-    final image = await picture.toImage(_width.toInt(), _height.toInt());
+    final image = await picture.toImage(width.toInt(), height.toInt());
     final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
     return byteData!.buffer.asUint8List();
   }
