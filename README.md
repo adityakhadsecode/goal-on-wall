@@ -17,7 +17,9 @@ Goal on Wall is a Flutter app that generates stunning, personalised wallpapers �
 
 ## ✨ What Is It?
 
-Every day you unlock your phone dozens of times. Goal on Wall turns that moment into a silent motivator — a beautiful, data-driven wallpaper showing exactly where you are in life, the year, or your journey toward a goal.
+Every day you unlock your phone dozens of times. Goal on Wall turns that moment into a silent motivator — a beautiful, data-driven wallpaper showing exactly where you are in life, the year, or your journey toward a goal. 
+
+Now featuring a **Dynamic Home Screen** that shows your active goal's progress at a glance, and a **Detailed Analytics Dashboard** to dive deep into your metrics.
 
 ---
 
@@ -32,6 +34,16 @@ Choose from **5 powerful calendar types**, each rendered in your preferred visua
 | **Goal Calendar** | 🎯 | Countdown from start to your personal deadline |
 | **Product Launch** | 🚀 | Days until your big launch day |
 | **Fitness Goal** | 💪 | Training days until your event or race |
+
+---
+
+## 🚀 Key Features
+
+- **Native Resolution Rendering** — Wallpapers are rendered at your device's exact physical pixel dimensions for maximum crispness.
+- **One-Tap Sharing** — Share your progress visually (PNG) and textually via WhatsApp, Instagram, or any other app.
+- **Customization Redirection** — Tweak your active wallpaper anytime; the app remembers your settings and pre-populates the editor.
+- **Goal Analytics** — A dedicated screen with progress charts, total/passed/remaining days, and a visual timeline.
+- **History & Memory** — Keeps track of your recently generated wallpapers.
 
 ---
 
@@ -52,34 +64,22 @@ The entire app is theme-aware with multiple handcrafted palettes:
 
 - 🌲 **Forest** — Deep greens, moss, and amber (default)
 - 🌊 **Ocean** — Deep navy with cyan accents
-- *(more themes planned)*
 
 All colours, gradients, and glass surfaces adapt instantly.
-
----
-
-## 📱 App Flow
-
-```
-Home Screen
-  └─▶ Create New Wallpaper
-        └─▶ 1. Choose Type  (Life / Year / Goal / Product Launch / Fitness Goal)
-              └─▶ 2. Pick a Style  (The Flow  ·  Dots)
-                    └─▶ 3. Define your Wallpaper  (dates, goal names, layout)
-                          └─▶ ✨ Generate Wallpaper
-```
 
 ---
 
 ## 🏗️ Tech Stack
 
 - **Flutter 3** — cross-platform UI
-- **Dart 3** — null-safe, exhaustive switch patterns
-- **Provider** — lightweight state management for theming
+- **Dart 3** — null-safe logic
+- **Provider** — state management for theming and saved wallpapers
 - **Custom Painters** — hand-drawn wallpaper previews (Flow path, Dot grid)
 - **Glassmorphism UI** — organic dark design language with `OrganicBackground`, `GlassCard`
 - **WorkManager** — daily periodic background refresh of lock screen
 - **Wallpaper Manager** — native platform integration for setting Android wallpaper
+- **Share Plus** — for sharing goal progress
+- **Intl** — date formatting and localization logic
 - **Shared Preferences** — persistent storage for wallpaper configurations
 
 ---
@@ -90,77 +90,47 @@ Home Screen
 lib/
 ├── main.dart
 ├── models/
-│   └── wallpaper_config.dart       # CalendarType & WallpaperTheme enums
+│   └── wallpaper_config.dart       # Core data models & enums
+├── providers/
+│   └── wallpaper_provider.dart     # State management for saved wallpapers
 ├── screens/
-│   ├── home_screen.dart            # Animated home with life snapshot
+│   ├── home_screen.dart            # Dynamic home with "My Goal Progress"
+│   ├── analytics_screen.dart       # Detailed goal metrics & timeline
+│   ├── wallpaper_preview_screen.dart # Final preview & setting logic
 │   ├── wallpaper_type_screen.dart  # Step 1 — Choose Type
 │   ├── theme_selection_screen.dart # Step 2 — Pick a Style
-│   ├── life_customize_screen.dart  # Step 3a — Life Calendar
-│   ├── year_customize_screen.dart  # Step 3b — Year Calendar
-│   ├── goal_customize_screen.dart  # Step 3c — Goal Calendar
+│   ├── life_customize_screen.dart  # Step 3+ — Configuration editors
+│   ├── year_customize_screen.dart
+│   ├── goal_customize_screen.dart
 │   ├── product_launch_customize_screen.dart
 │   └── fitness_goal_customize_screen.dart
 ├── theme/
-│   ├── app_theme.dart              # AppColorPalette definitions
+│   ├── app_theme.dart              # Palette definitions
 │   └── theme_provider.dart
-└── widgets/
-    ├── organic_background.dart     # Radial gradient + floating orbs
-    ├── glass_card.dart             # Frosted glass card
-    ├── customize_shared_widgets.dart  # Shared: Breadcrumb, DateInputField (with validation), GenerateButton
-    ├── main_scaffold.dart
-    ├── dot_grid.dart
-    └── glass_card.dart
 ├── services/
-    ├── background_task.dart        # WorkManager dispatcher for daily refresh
-    ├── wallpaper_service.dart     # PNG rendering & Android WallpaperManager
-    └── wallpaper_storage.dart     # SharedPreferences config persistence
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- [Flutter SDK](https://docs.flutter.dev/get-started/install) ≥ 3.0
-- Dart ≥ 3.0
-- Android Studio / VS Code with Flutter extension
-
-### Run locally
-
-```bash
-# Clone the repo
-git clone https://github.com/adityakhadsecode/goal-on-wall.git
-cd goal-on-wall
-
-# Install dependencies
-flutter pub get
-
-# Run on your device / emulator
-flutter run
-
-# Or run on Chrome (web)
-flutter run -d chrome
-```
-
-### Analyse
-
-```bash
-flutter analyze   # Should report: No issues found!
+│   ├── background_task.dart        # Daily refresh dispatcher
+│   ├── wallpaper_service.dart     # PNG rendering (Native Resolution)
+│   └── wallpaper_storage.dart     # SharedPreferences persistence
+└── widgets/
+    ├── organic_background.dart     # Animated radial surfaces
+    ├── glass_card.dart             # Frosted glass containers
+    └── customize_shared_widgets.dart
 ```
 
 ---
 
 ## 🗺️ Roadmap
 
-- [x] Actual wallpaper image generation (canvas → PNG export)
-- [x] Android lock screen auto-set via platform channel
-- [x] Date validation for all calendar inputs (clamped ranges)
-- [x] Daily automatic background refresh via WorkManager
+- [x] Actual wallpaper image generation (Native Resolution PNG)
+- [x] Android lock screen auto-set
+- [x] Dynamic Home Screen metrics
+- [x] Detailed Analytics & Timeline view
+- [x] One-tap Sharing system
+- [x] Daily automatic background refresh
 - [ ] iOS Shortcuts integration
 - [ ] More visual styles (Heatmap, Arc, Timeline)
-- [ ] iCloud / Google Drive backup of wallpaper configs
-- [ ] Widget support (home screen widgets)
+- [ ] Cloud backup of configurations
+- [ ] Home screen widget support
 
 ---
 
