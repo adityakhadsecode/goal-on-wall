@@ -243,31 +243,38 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
             builder: (context, constraints) {
               const dotSize = 7.0;
               const spacing = 3.0;
-              return Wrap(
-                spacing: spacing,
-                runSpacing: spacing,
-                children: List.generate(_totalDaysInYear, (index) {
-                  final isCompleted = index < _daysPassed;
-                  return Container(
-                    width: dotSize,
-                    height: dotSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isCompleted
-                          ? palette.primaryLight
-                          : Colors.white.withValues(alpha: 0.08),
-                      boxShadow: isCompleted
-                          ? [
-                              BoxShadow(
-                                color: (palette.primaryLight)
-                                    .withValues(alpha: 0.25),
-                                blurRadius: 3,
-                              ),
-                            ]
-                          : null,
-                    ),
-                  );
-                }),
+              return FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  width: constraints.maxWidth,
+                  child: Wrap(
+                    spacing: spacing,
+                    runSpacing: spacing,
+                    children: List.generate(_totalDaysInYear, (index) {
+                      final isCompleted = index < _daysPassed;
+                      return Container(
+                        width: dotSize,
+                        height: dotSize,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isCompleted
+                              ? palette.primaryLight
+                              : Colors.white.withValues(alpha: 0.08),
+                          boxShadow: isCompleted
+                              ? [
+                                  BoxShadow(
+                                    color: (palette.primaryLight)
+                                        .withValues(alpha: 0.25),
+                                    blurRadius: 3,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                      );
+                    }),
+                  ),
+                ),
               );
             },
           ),
@@ -287,11 +294,9 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: List.generate(12, (monthIndex) {
-          final daysInMonth =
-              DateTime(year, monthIndex + 2, 0).day;
+          final daysInMonth = DateTime(year, monthIndex + 2, 0).day;
           final startOfMonth = DateTime(year, monthIndex + 1, 1);
-          final dayOfYearStart =
-              startOfMonth.difference(DateTime(year, 1, 1)).inDays;
+          final dayOfYearStart = startOfMonth.difference(DateTime(year, 1, 1)).inDays;
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
@@ -320,33 +325,42 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
                   ],
                 ),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 3,
-                  runSpacing: 3,
-                  children: List.generate(daysInMonth, (dayIndex) {
-                    final dayOfYear = dayOfYearStart + dayIndex;
-                    final isCompleted = dayOfYear < _daysPassed;
-                    return Container(
-                      width: 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCompleted
-                            ? palette.primaryLight
-                            : Colors.white.withValues(alpha: 0.08),
-                        boxShadow: isCompleted
-                            ? [
-                                BoxShadow(
-                                  color: (palette.primaryLight)
-                                      .withValues(alpha: 0.25),
-                                  blurRadius: 3,
-                                ),
-                              ]
-                            : null,
+                LayoutBuilder(builder: (context, constraints) {
+                  return FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: SizedBox(
+                      width: constraints.maxWidth,
+                      child: Wrap(
+                        spacing: 3,
+                        runSpacing: 3,
+                        children: List.generate(daysInMonth, (dayIndex) {
+                          final dayOfYear = dayOfYearStart + dayIndex;
+                          final isCompleted = dayOfYear < _daysPassed;
+                          return Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: isCompleted
+                                  ? palette.primaryLight
+                                  : Colors.white.withValues(alpha: 0.08),
+                              boxShadow: isCompleted
+                                  ? [
+                                      BoxShadow(
+                                        color: (palette.primaryLight as Color)
+                                            .withValues(alpha: 0.25),
+                                        blurRadius: 3,
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                          );
+                        }),
                       ),
-                    );
-                  }),
-                ),
+                    ),
+                  );
+                }),
               ],
             ),
           );
@@ -381,8 +395,7 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
             final daysInMonth = DateTime(year, month + 1, 0).day;
             totalQuarterDays += daysInMonth;
             final startOfMonth = DateTime(year, month, 1);
-            final dayOfYearStart =
-                startOfMonth.difference(DateTime(year, 1, 1)).inDays;
+            final dayOfYearStart = startOfMonth.difference(DateTime(year, 1, 1)).inDays;
             for (int d = 0; d < daysInMonth; d++) {
               if (dayOfYearStart + d < _daysPassed) {
                 completedQuarterDays++;
@@ -390,8 +403,7 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
             }
           }
 
-          final qPercent =
-              ((completedQuarterDays / totalQuarterDays) * 100).round();
+          final qPercent = ((completedQuarterDays / totalQuarterDays) * 100).round();
 
           return Padding(
             padding: const EdgeInsets.only(bottom: 24),
@@ -424,8 +436,7 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
                 ...months.map((month) {
                   final daysInMonth = DateTime(year, month + 1, 0).day;
                   final startOfMonth = DateTime(year, month, 1);
-                  final dayOfYearStart =
-                      startOfMonth.difference(DateTime(year, 1, 1)).inDays;
+                  final dayOfYearStart = startOfMonth.difference(DateTime(year, 1, 1)).inDays;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 4),
@@ -443,34 +454,42 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
                           ),
                         ),
                         Expanded(
-                          child: Wrap(
-                            spacing: 2.5,
-                            runSpacing: 2.5,
-                            children: List.generate(daysInMonth, (dayIndex) {
-                              final dayOfYear = dayOfYearStart + dayIndex;
-                              final isCompleted = dayOfYear < _daysPassed;
-                              return Container(
-                                width: 7,
-                                height: 7,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: isCompleted
-                                      ? palette.primaryLight
-                                      : Colors.white.withValues(alpha: 0.08),
-                                  boxShadow: isCompleted
-                                      ? [
-                                          BoxShadow(
-                                            color: (palette.primaryLight
-                                                    )
-                                                .withValues(alpha: 0.25),
-                                            blurRadius: 3,
-                                          ),
-                                        ]
-                                      : null,
+                          child: LayoutBuilder(builder: (context, constraints) {
+                            return FittedBox(
+                              fit: BoxFit.scaleDown,
+                              alignment: Alignment.centerLeft,
+                              child: SizedBox(
+                                width: constraints.maxWidth,
+                                child: Wrap(
+                                  spacing: 2.5,
+                                  runSpacing: 2.5,
+                                  children: List.generate(daysInMonth, (dayIndex) {
+                                    final dayOfYear = dayOfYearStart + dayIndex;
+                                    final isCompleted = dayOfYear < _daysPassed;
+                                    return Container(
+                                      width: 7,
+                                      height: 7,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: isCompleted
+                                            ? palette.primaryLight
+                                            : Colors.white.withValues(alpha: 0.08),
+                                        boxShadow: isCompleted
+                                            ? [
+                                                BoxShadow(
+                                                  color: (palette.primaryLight as Color)
+                                                      .withValues(alpha: 0.25),
+                                                  blurRadius: 3,
+                                                ),
+                                              ]
+                                            : null,
+                                      ),
+                                    );
+                                  }),
                                 ),
-                              );
-                            }),
-                          ),
+                              ),
+                            );
+                          }),
                         ),
                       ],
                     ),

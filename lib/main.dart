@@ -6,6 +6,7 @@ import 'package:workmanager/workmanager.dart';
 import 'theme/theme_provider.dart';
 import 'widgets/main_scaffold.dart';
 import 'services/background_task.dart';
+import 'providers/wallpaper_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,8 +37,11 @@ class GoalOnWallApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ThemeProvider(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => WallpaperProvider()),
+      ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           final palette = themeProvider.palette;

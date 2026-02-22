@@ -78,4 +78,24 @@ class WallpaperData {
       label: '${now.year}',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'calendarType': calendarType.index,
+      'wallpaperTheme': wallpaperTheme.index,
+      'startDate': startDate.toIso8601String(),
+      'endDate': endDate.toIso8601String(),
+      'label': label,
+    };
+  }
+
+  factory WallpaperData.fromJson(Map<String, dynamic> json) {
+    return WallpaperData(
+      calendarType: CalendarType.values[json['calendarType'] as int],
+      wallpaperTheme: WallpaperTheme.values[json['wallpaperTheme'] as int],
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: DateTime.parse(json['endDate'] as String),
+      label: json['label'] as String?,
+    );
+  }
 }

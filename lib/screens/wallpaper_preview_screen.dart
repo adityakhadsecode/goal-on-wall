@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
 import '../models/wallpaper_config.dart';
+import '../providers/wallpaper_provider.dart';
 import '../painters/dot_wallpaper_painter.dart';
 import '../services/wallpaper_service.dart';
 import '../services/wallpaper_storage.dart';
@@ -44,6 +45,12 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
         labelColor: labelColor.toARGB32(),
         monthLabelColor: monthLabelColor.toARGB32(),
       );
+
+      // Add to memory provider
+      if (mounted) {
+        Provider.of<WallpaperProvider>(context, listen: false)
+            .addWallpaper(widget.data);
+      }
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

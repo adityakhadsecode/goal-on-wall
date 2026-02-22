@@ -106,6 +106,36 @@ class _MainScaffoldState extends State<MainScaffold> {
                   );
                 },
               ),
+              const SizedBox(height: 12),
+              _buildAddOption(
+                icon: Icons.rocket_launch_rounded,
+                label: 'Product Launch',
+                subtitle: 'Countdown to your big launch day',
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WallpaperTypeScreen(), // Navigate to type screen first or direct?
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 12),
+              _buildAddOption(
+                icon: Icons.fitness_center_rounded,
+                label: 'Fitness Goal',
+                subtitle: 'Track your training journey',
+                onTap: () {
+                  Navigator.pop(ctx);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => const WallpaperTypeScreen(),
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: 24),
             ],
           ),

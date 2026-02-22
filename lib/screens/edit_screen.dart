@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
+import '../providers/wallpaper_provider.dart';
+import '../models/wallpaper_config.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import 'year_calendar_screen.dart';
@@ -72,71 +74,62 @@ class EditScreen extends StatelessWidget {
 
             // Calendar cards
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                children: [
-                  _buildCalendarCard(
-                    context,
-                    icon: Icons.calendar_view_day_rounded,
-                    title: 'Year Calendar',
-                    subtitle: 'Track ${DateTime.now().year} progress',
-                    progress: _getYearProgress(),
-                    palette: palette,
-                    onTap: () {
-                      Navigator.push(
+              child: Consumer<WallpaperProvider>(
+                builder: (context, provider, child) {
+                  final savedWallpapers = provider.savedWallpapers;
+                  
+                  if (savedWallpapers.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.history_rounded,
+                            size: 64,
+                            color: palette.textMuted.withValues(alpha: 0.2),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No saved wallpapers yet',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: palette.textMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Create one to see it here',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: palette.textMuted.withValues(alpha: 0.7),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
+                    itemCount: savedWallpapers.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final data = savedWallpapers[index];
+                      return _buildCalendarCard(
                         context,
-                        MaterialPageRoute(
-                          builder: (_) => const YearCalendarScreen(),
-                        ),
+                        icon: _getIconForType(data.calendarType),
+                        title: data.label ?? _getTitleForType(data.calendarType),
+                        subtitle: data.caption,
+                        progress: data.progress,
+                        palette: palette,
+                        onTap: () {
+                          // Navigate to preview for that specific data
+                        },
                       );
                     },
-                  ),
-                  const SizedBox(height: 12),
-                  _buildCalendarCard(
-                    context,
-                    icon: Icons.grid_view_rounded,
-                    title: 'Life Calendar',
-                    subtitle: 'Your life visualized in weeks',
-                    progress: 0.33,
-                    palette: palette,
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 12),
-                  _buildCalendarCard(
-                    context,
-                    icon: Icons.flag_rounded,
-                    title: 'Product Launch',
-                    subtitle: 'Goal countdown • 314 days left',
-                    progress: 0.14,
-                    palette: palette,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const GoalCalendarScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  _buildCalendarCard(
-                    context,
-                    icon: Icons.fitness_center_rounded,
-                    title: 'Fitness Goal',
-                    subtitle: 'Goal countdown • 180 days left',
-                    progress: 0.5,
-                    palette: palette,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => const GoalCalendarScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 100),
-                ],
+                  );
+                },
               ),
             ),
           ],
@@ -152,6 +145,26 @@ class EditScreen extends StatelessWidget {
     final totalDays = endOfYear.difference(startOfYear).inDays + 1;
     final daysPassed = now.difference(startOfYear).inDays + 1;
     return daysPassed / totalDays;
+  }
+
+  IconData _getIconForType(CalendarType type) {
+    switch (type) {
+      case CalendarType.life: return Icons.grid_view_rounded;
+      case CalendarType.year: return Icons.calendar_view_day_rounded;
+      case CalendarType.goal: return Icons.flag_rounded;
+      case CalendarType.productLaunch: return Icons.rocket_launch_rounded;
+      case CalendarType.fitnessGoal: return Icons.fitness_center_rounded;
+    }
+  }
+
+  String _getTitleForType(CalendarType type) {
+    switch (type) {
+      case CalendarType.life: return 'Life Calendar';
+      case CalendarType.year: return 'Year Calendar';
+      case CalendarType.goal: return 'Goal Calendar';
+      case CalendarType.productLaunch: return 'Product Launch';
+      case CalendarType.fitnessGoal: return 'Fitness Goal';
+    }
   }
 
   Widget _buildCalendarCard(

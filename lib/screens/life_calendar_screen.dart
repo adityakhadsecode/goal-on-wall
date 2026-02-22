@@ -203,32 +203,36 @@ class LifeCalendarScreen extends StatelessWidget {
                     : const SizedBox(),
               ),
               Expanded(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: List.generate(weeksPerRow, (weekIndex) {
-                    final dotIndex = yearIndex * weeksPerRow + weekIndex;
-                    final isCompleted = dotIndex < completedWeeks;
-                    return Container(
-                      width: 4,
-                      height: 4,
-                      margin: const EdgeInsets.all(0.8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCompleted
-                            ? palette.primaryLight
-                            : Colors.white.withValues(alpha: 0.06),
-                        boxShadow: isCompleted
-                            ? [
-                                BoxShadow(
-                                  color: (palette.primaryLight)
-                                      .withValues(alpha: 0.2),
-                                  blurRadius: 2,
-                                ),
-                              ]
-                            : null,
-                      ),
-                    );
-                  }),
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: List.generate(weeksPerRow, (weekIndex) {
+                      final dotIndex = yearIndex * weeksPerRow + weekIndex;
+                      final isCompleted = dotIndex < completedWeeks;
+                      return Container(
+                        width: 4,
+                        height: 4,
+                        margin: const EdgeInsets.all(0.8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: isCompleted
+                              ? palette.primaryLight
+                              : Colors.white.withValues(alpha: 0.06),
+                          boxShadow: isCompleted
+                              ? [
+                                  BoxShadow(
+                                    color: (palette.primaryLight)
+                                        .withValues(alpha: 0.2),
+                                    blurRadius: 2,
+                                  ),
+                                ]
+                              : null,
+                        ),
+                      );
+                    }),
+                  ),
                 ),
               ),
             ],
