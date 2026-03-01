@@ -3,21 +3,56 @@ import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
+import '../services/user_prefs.dart';
 
-class LifeCalendarScreen extends StatelessWidget {
+class LifeCalendarScreen extends StatefulWidget {
   const LifeCalendarScreen({super.key});
+
+  @override
+  State<LifeCalendarScreen> createState() => _LifeCalendarScreenState();
+}
+
+class _LifeCalendarScreenState extends State<LifeCalendarScreen> {
+  int _lifeExpectancy = UserPrefs.defaultLifeExpectancy;
+  DateTime? _birthDate;
+  bool _loaded = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPrefs();
+  }
+
+  Future<void> _loadPrefs() async {
+    final years = await UserPrefs.getLifeExpectancy();
+    final birth = await UserPrefs.getBirthDate();
+    if (mounted) {
+      setState(() {
+        _lifeExpectancy = years;
+        _birthDate = birth;
+        _loaded = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<ThemeProvider>().palette;
     final now = DateTime.now();
 
-    // Assume birth year for demo — user can configure later
-    final birthDate = DateTime(2000, 1, 1);
+    final birthDate = _birthDate ?? DateTime(2000, 1, 1);
     final ageInWeeks = now.difference(birthDate).inDays ~/ 7;
-    final totalWeeks = 80 * 52; // 80-year lifespan
+    final totalWeeks = _lifeExpectancy * 52;
     final ageInYears = now.difference(birthDate).inDays ~/ 365;
     final percentage = ((ageInWeeks / totalWeeks) * 100).round();
+
+    if (!_loaded) {
+      return OrganicBackground(
+        child: Center(
+          child: CircularProgressIndicator(color: palette.primaryLight),
+        ),
+      );
+    }
 
     return OrganicBackground(
       child: SafeArea(
@@ -180,7 +215,7 @@ class LifeCalendarScreen extends StatelessWidget {
 
   Widget _buildLifeGrid(int completedWeeks, int totalWeeks, dynamic palette) {
     const weeksPerRow = 52; // one row per year
-    final totalYears = 80;
+    final totalYears = _lifeExpectancy;
 
     return Column(
       children: List.generate(totalYears, (yearIndex) {

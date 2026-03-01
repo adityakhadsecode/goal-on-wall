@@ -245,7 +245,7 @@ class _MainScaffoldState extends State<MainScaffold> {
               _buildNavItem(1, Icons.eco_rounded, 'Edit'),
               _buildCenterButton(),
               _buildNavItem(3, Icons.grid_view_rounded, 'Life'),
-              _buildNavItem(4, Icons.settings_rounded, 'Set'),
+              _buildNavItem(4, Icons.settings_rounded, 'Settings'),
             ],
           ),
         ),

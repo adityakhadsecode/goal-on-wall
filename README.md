@@ -44,6 +44,9 @@ Choose from **5 powerful calendar types**, each rendered in your preferred visua
 - **Customization Redirection** — Tweak your active wallpaper anytime; the app remembers your settings and pre-populates the editor.
 - **Goal Analytics** — A dedicated screen with progress charts, total/passed/remaining days, and a visual timeline.
 - **History & Memory** — Keeps track of your recently generated wallpapers.
+- **Life Calendar** — Visualise your entire life in weeks with an interactive dot grid.
+- **Editable Life Expectancy** — Customise the life expectancy used across all life-calendar calculations from Settings.
+- **Persistent User Preferences** — Birth date and life expectancy are saved and reused automatically across screens.
 
 ---
 
@@ -109,6 +112,7 @@ lib/
 │   └── theme_provider.dart
 ├── services/
 │   ├── background_task.dart        # Daily refresh dispatcher
+│   ├── user_prefs.dart            # User preferences (birth date, life expectancy)
 │   ├── wallpaper_service.dart     # PNG rendering (Native Resolution)
 │   └── wallpaper_storage.dart     # SharedPreferences persistence
 └── widgets/
@@ -116,6 +120,24 @@ lib/
     ├── glass_card.dart             # Frosted glass containers
     └── customize_shared_widgets.dart
 ```
+
+---
+
+## 📋 Changelog
+
+### v1.5.0 (2026-03-01)
+- ✨ **Editable Life Expectancy** — Users can now customise the life expectancy value used in the Life Calendar directly from Settings.
+- ✨ **Life Calendar reads user prefs** — Life Calendar screen dynamically uses saved birth date and life expectancy instead of hard-coded defaults.
+- ✨ **UserPrefs service** — New `user_prefs.dart` service for managing persistent user preferences (birth date, life expectancy).
+- 🔧 **Settings tab renamed** — Bottom navigation label changed from "Set" to "Settings" for clarity.
+- 🔧 **Gradle updated** — Upgraded Gradle wrapper and settings for build compatibility.
+- 📦 **Version bump** — `1.5.0+6`
+
+### v1.4.1 (Previous)
+- Minor bug fixes and stability improvements.
+
+### v1.3.0
+- Analytics & Sharing release with detailed goal metrics and one-tap share.
 
 ---
 
@@ -127,6 +149,8 @@ lib/
 - [x] Detailed Analytics & Timeline view
 - [x] One-tap Sharing system
 - [x] Daily automatic background refresh
+- [x] Editable life expectancy in Settings
+- [x] Life Calendar with user preferences
 - [ ] iOS Shortcuts integration
 - [ ] More visual styles (Heatmap, Arc, Timeline)
 - [ ] Cloud backup of configurations

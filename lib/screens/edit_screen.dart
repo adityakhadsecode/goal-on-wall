@@ -5,8 +5,8 @@ import '../providers/wallpaper_provider.dart';
 import '../models/wallpaper_config.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
-import 'year_calendar_screen.dart';
-import 'goal_calendar_screen.dart';
+import '../widgets/glass_card.dart';
+
 
 class EditScreen extends StatelessWidget {
   const EditScreen({super.key});
@@ -138,14 +138,7 @@ class EditScreen extends StatelessWidget {
     );
   }
 
-  double _getYearProgress() {
-    final now = DateTime.now();
-    final startOfYear = DateTime(now.year, 1, 1);
-    final endOfYear = DateTime(now.year, 12, 31);
-    final totalDays = endOfYear.difference(startOfYear).inDays + 1;
-    final daysPassed = now.difference(startOfYear).inDays + 1;
-    return daysPassed / totalDays;
-  }
+
 
   IconData _getIconForType(CalendarType type) {
     switch (type) {

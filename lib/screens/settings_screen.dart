@@ -15,16 +15,23 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   DateTime? _savedBirthDate;
+  int _lifeExpectancy = UserPrefs.defaultLifeExpectancy;
 
   @override
   void initState() {
     super.initState();
     _loadBirthDate();
+    _loadLifeExpectancy();
   }
 
   Future<void> _loadBirthDate() async {
     final date = await UserPrefs.getBirthDate();
     if (mounted) setState(() => _savedBirthDate = date);
+  }
+
+  Future<void> _loadLifeExpectancy() async {
+    final years = await UserPrefs.getLifeExpectancy();
+    if (mounted) setState(() => _lifeExpectancy = years);
   }
 
   String get _birthDateLabel {
@@ -65,6 +72,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
             onSave: (date) async {
               await UserPrefs.saveBirthDate(date);
               if (mounted) setState(() => _savedBirthDate = date);
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  void _showLifeExpectancySheet(AppColorPalette palette) {
+    final ctrl = TextEditingController(text: _lifeExpectancy.toString());
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+          ),
+          child: _LifeExpectancySheet(
+            palette: palette,
+            controller: ctrl,
+            onSave: (years) async {
+              await UserPrefs.saveLifeExpectancy(years);
+              if (mounted) setState(() => _lifeExpectancy = years);
             },
           ),
         );
@@ -216,11 +248,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           color: Colors.white.withValues(alpha: 0.05),
                           height: 1,
                         ),
-                        _buildSettingsItem(
+                        _buildTappableSettingsItem(
                           'Life Expectancy',
-                          '80 years',
+                          '$_lifeExpectancy years',
                           Icons.timeline_rounded,
                           palette,
+                          onTap: () => _showLifeExpectancySheet(palette),
                         ),
                       ],
                     ),
@@ -811,6 +844,164 @@ class _SheetDateField extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Life Expectancy Bottom Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _LifeExpectancySheet extends StatefulWidget {
+  const _LifeExpectancySheet({
+    required this.palette,
+    required this.controller,
+    required this.onSave,
+  });
+
+  final AppColorPalette palette;
+  final TextEditingController controller;
+  final Future<void> Function(int) onSave;
+
+  @override
+  State<_LifeExpectancySheet> createState() => _LifeExpectancySheetState();
+}
+
+class _LifeExpectancySheetState extends State<_LifeExpectancySheet> {
+  bool _saving = false;
+
+  bool get _isValid {
+    final n = int.tryParse(widget.controller.text);
+    return n != null && n >= 1 && n <= 150;
+  }
+
+  Future<void> _save() async {
+    if (!_isValid) return;
+    setState(() => _saving = true);
+    final years = int.parse(widget.controller.text);
+    await widget.onSave(years);
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.palette;
+    return Container(
+      decoration: BoxDecoration(
+        color: p.cardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Container(
+            width: 36,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          Row(
+            children: [
+              Icon(Icons.timeline_rounded, color: p.primaryLight, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                'Life Expectancy',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: p.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Set the total expected lifespan in years',
+            style: TextStyle(fontSize: 12, color: p.textMuted),
+          ),
+          const SizedBox(height: 24),
+
+          TextFormField(
+            controller: widget.controller,
+            keyboardType: TextInputType.number,
+            maxLength: 3,
+            textAlign: TextAlign.center,
+            onChanged: (_) => setState(() {}),
+            style: TextStyle(
+              color: p.textPrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: 28,
+            ),
+            decoration: InputDecoration(
+              hintText: '80',
+              hintStyle: TextStyle(color: p.textMuted, fontSize: 28),
+              counterText: '',
+              suffixText: 'years',
+              suffixStyle: TextStyle(
+                color: p.textMuted,
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.05),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.1), width: 1),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.1), width: 1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: p.primaryLight, width: 1.5),
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _isValid && !_saving ? _save : null,
+              style: FilledButton.styleFrom(
+                backgroundColor: p.primaryLight,
+                disabledBackgroundColor: p.primaryLight.withValues(alpha: 0.3),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
+              child: _saving
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(
+                      'Save',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

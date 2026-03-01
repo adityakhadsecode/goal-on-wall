@@ -20,7 +20,7 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Register daily wallpaper refresh with WorkManager
-  await Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
+  await Workmanager().initialize(callbackDispatcher);
   await Workmanager().registerPeriodicTask(
     'daily-wallpaper-refresh',
     refreshWallpaperTask,
