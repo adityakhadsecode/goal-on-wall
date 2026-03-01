@@ -128,6 +128,14 @@ lib/
 
 ## 📋 Changelog
 
+### v1.7.0-beta (2026-03-01)
+- ⚡ **GlassCard Performance** — Removed expensive `BackdropFilter` / `ImageFilter.blur`; replaced with lightweight `BoxShadow` + solid translucent fill for smoother rendering.
+- ⚡ **Life Calendar Repaint Guard** — Added `RepaintBoundary` and proper `shouldRepaint` to the life-calendar custom painter, eliminating unnecessary redraws on scroll.
+- ⚡ **DotGrid Repaint Guard** — Added `shouldRepaint` override to the dot-grid painter so it only repaints when data actually changes.
+- ⚡ **Home Screen Animation Tune-Up** — Optimised animation controllers and reduced overdraw in the home screen gradient and parallax layers.
+- 🔧 **Bottom Nav Cleanup** — Simplified `MainScaffold` bottom navigation item list and refresh-key logic.
+- 📦 **Version bump** — `1.7.0-beta+8`
+
 ### v1.6.0 (2026-03-01)
 - ✨ **Editable User Name** — New PROFILE section in Settings with a bottom sheet to edit your name.
 - ✨ **Dynamic Home Greeting** — Home screen greeting now displays your saved name ("Hii {name} 👋").
@@ -167,6 +175,7 @@ lib/
 - [x] Editable user name in Settings
 - [x] Edit saved calendars from Edit tab
 - [x] 120Hz / 90Hz display optimisation
+- [x] Animation & rendering performance optimisation
 - [ ] iOS Shortcuts integration
 - [ ] More visual styles (Heatmap, Arc, Timeline)
 - [ ] Cloud backup of configurations

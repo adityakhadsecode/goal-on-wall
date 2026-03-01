@@ -35,32 +35,23 @@ class DotGrid extends StatelessWidget {
   Widget _buildFlatGrid(dynamic palette) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Wrap(
-          spacing: dotSpacing,
-          runSpacing: dotSpacing,
-          children: List.generate(totalDots, (index) {
-            final isCompleted = index < completedDots;
-            return Container(
-              width: dotSize,
-              height: dotSize,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: isCompleted
-                    ? palette.primaryLight
-                    : Colors.white.withValues(alpha: 0.08),
-                boxShadow: isCompleted
-                    ? [
-                        BoxShadow(
-                          color: (palette.primaryLight)
-                              .withValues(alpha: 0.3),
-                          blurRadius: 4,
-                          spreadRadius: 0,
-                        ),
-                      ]
-                    : null,
-              ),
-            );
-          }),
+        final cols = (constraints.maxWidth / (dotSize + dotSpacing)).floor();
+        final rows = (totalDots / cols).ceil();
+        final gridHeight = rows * (dotSize + dotSpacing);
+        return SizedBox(
+          height: gridHeight,
+          child: CustomPaint(
+            size: Size(constraints.maxWidth, gridHeight),
+            painter: _DotGridPainter(
+              totalDots: totalDots,
+              completedDots: completedDots,
+              dotSize: dotSize,
+              dotSpacing: dotSpacing,
+              cols: cols,
+              completedColor: palette.primaryLight as Color,
+              emptyColor: Colors.white.withValues(alpha: 0.08),
+            ),
+          ),
         );
       },
     );
@@ -92,33 +83,29 @@ class DotGrid extends StatelessWidget {
                   ),
                 ),
               ),
-              Wrap(
-                spacing: dotSpacing,
-                runSpacing: dotSpacing,
-                children: List.generate(groupSize, (i) {
-                  final currentDot = startIndex + i;
-                  final isCompleted = currentDot < completedDots;
-                  return Container(
-                    width: dotSize,
-                    height: dotSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isCompleted
-                          ? palette.primaryLight
-                          : Colors.white.withValues(alpha: 0.08),
-                      boxShadow: isCompleted
-                          ? [
-                              BoxShadow(
-                                color: (palette.primaryLight)
-                                    .withValues(alpha: 0.3),
-                                blurRadius: 4,
-                                spreadRadius: 0,
-                              ),
-                            ]
-                          : null,
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final cols =
+                      (constraints.maxWidth / (dotSize + dotSpacing)).floor();
+                  final rows = (groupSize / cols).ceil();
+                  final gridHeight = rows * (dotSize + dotSpacing);
+                  return SizedBox(
+                    height: gridHeight,
+                    child: CustomPaint(
+                      size: Size(constraints.maxWidth, gridHeight),
+                      painter: _DotGridPainter(
+                        totalDots: groupSize,
+                        completedDots:
+                            (completedDots - startIndex).clamp(0, groupSize),
+                        dotSize: dotSize,
+                        dotSpacing: dotSpacing,
+                        cols: cols,
+                        completedColor: palette.primaryLight as Color,
+                        emptyColor: Colors.white.withValues(alpha: 0.08),
+                      ),
                     ),
                   );
-                }),
+                },
               ),
             ],
           ),
@@ -126,4 +113,50 @@ class DotGrid extends StatelessWidget {
       }),
     );
   }
+}
+
+class _DotGridPainter extends CustomPainter {
+  final int totalDots;
+  final int completedDots;
+  final double dotSize;
+  final double dotSpacing;
+  final int cols;
+  final Color completedColor;
+  final Color emptyColor;
+
+  _DotGridPainter({
+    required this.totalDots,
+    required this.completedDots,
+    required this.dotSize,
+    required this.dotSpacing,
+    required this.cols,
+    required this.completedColor,
+    required this.emptyColor,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final completedPaint = Paint()..color = completedColor;
+    final emptyPaint = Paint()..color = emptyColor;
+    final radius = dotSize / 2;
+    final cellSize = dotSize + dotSpacing;
+
+    for (int i = 0; i < totalDots; i++) {
+      final col = i % cols;
+      final row = i ~/ cols;
+      final x = col * cellSize + radius;
+      final y = row * cellSize + radius;
+      canvas.drawCircle(
+        Offset(x, y),
+        radius,
+        i < completedDots ? completedPaint : emptyPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DotGridPainter old) =>
+      old.totalDots != totalDots ||
+      old.completedDots != completedDots ||
+      old.completedColor != completedColor;
 }

@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
     _riverController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 4),
+      duration: const Duration(seconds: 10),
     )..repeat();
 
     _insightFadeController = AnimationController(
@@ -143,7 +143,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       child: SafeArea(
         bottom: false,
         child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           padding: const EdgeInsets.only(bottom: 110),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 22),
@@ -162,14 +162,16 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 const SizedBox(height: 28),
 
                 // ── ACTIVE WALLPAPER CARD ─────────────────────
-                _WallpaperPreviewCard(
-                  palette: palette,
-                  yearProgress: progressFactor,
-                  yearPct: progressPct,
-                  daysPassed: elapsedDaysValue,
-                  floatController: _floatingController,
-                  riverController: _riverController,
-                  cardHeight: size.height * 0.40,
+                RepaintBoundary(
+                  child: _WallpaperPreviewCard(
+                    palette: palette,
+                    yearProgress: progressFactor,
+                    yearPct: progressPct,
+                    daysPassed: elapsedDaysValue,
+                    floatController: _floatingController,
+                    riverController: _riverController,
+                    cardHeight: size.height * 0.40,
+                  ),
                 ),
 
                 const SizedBox(height: 20),
@@ -223,28 +225,19 @@ class _GreetingHeader extends StatelessWidget {
             final dy = sin(floatController.value * 2 * pi) * 1.5;
             return Transform.translate(
               offset: Offset(0, dy),
-              child: ShaderMask(
-                shaderCallback: (bounds) => LinearGradient(
-                  colors: [
-                    palette.textPrimary as Color,
-                    palette.primaryLight as Color,
-                  ],
-                  stops: const [0.55, 1.0],
-                ).createShader(bounds),
-                blendMode: BlendMode.srcIn,
-                child: Text(
-                  'Hii $userName 👋',
-                  style: const TextStyle(
-                    fontSize: 30,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
-                    height: 1.1,
-                    color: Colors.white, // shaderMask overrides color
-                  ),
-                ),
-              ),
+              child: child,
             );
           },
+          child: Text(
+            'Hii $userName 👋',
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.5,
+              height: 1.1,
+              color: palette.textPrimary as Color,
+            ),
+          ),
         ),
         const SizedBox(height: 6),
         Text(
@@ -1061,8 +1054,8 @@ class RiverFlowPainter extends CustomPainter {
     );
 
     // Animated shimmer dots
-    for (int i = 0; i < 5; i++) {
-      final t = (animValue + i / 5.0) % 1.0;
+    for (int i = 0; i < 3; i++) {
+      final t = (animValue + i / 3.0) % 1.0;
       final offsetLen =
           totalLen * (1 - completedLen) + t * totalLen * completedLen;
       final tan =
