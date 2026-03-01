@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../theme/app_theme.dart';
 import '../theme/theme_provider.dart';
 import '../widgets/organic_background.dart';
@@ -17,6 +19,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   DateTime? _savedBirthDate;
   int _lifeExpectancy = UserPrefs.defaultLifeExpectancy;
   String _userName = '';
+  String _appVersion = '...';
 
   @override
   void initState() {
@@ -24,6 +27,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadBirthDate();
     _loadLifeExpectancy();
     _loadUserName();
+    _loadVersion();
   }
 
   Future<void> _loadBirthDate() async {
@@ -39,6 +43,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadUserName() async {
     final name = await UserPrefs.getUserName();
     if (mounted) setState(() => _userName = name ?? '');
+  }
+
+  Future<void> _loadVersion() async {
+    final info = await PackageInfo.fromPlatform();
+    if (mounted) setState(() => _appVersion = info.version);
+  }
+
+  Future<void> _openGitHub() async {
+    final uri = Uri.parse('https://github.com/adityakhadsecode/goal-on-wall');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   String get _birthDateLabel {
@@ -340,7 +356,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       children: [
                         _buildSettingsItem(
                           'Version',
-                          '1.0.0',
+                          _appVersion,
                           Icons.info_outline_rounded,
                           palette,
                         ),
@@ -348,11 +364,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           color: Colors.white.withValues(alpha: 0.05),
                           height: 1,
                         ),
-                        _buildSettingsItem(
-                          'Rate App',
-                          'Share your feedback',
-                          Icons.star_outline_rounded,
+                        _buildTappableSettingsItem(
+                          'Support on GitHub',
+                          'Star the project & report issues',
+                          Icons.code_rounded,
                           palette,
+                          onTap: _openGitHub,
                         ),
                       ],
                     ),

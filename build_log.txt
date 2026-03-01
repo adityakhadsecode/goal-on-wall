@@ -3,29 +3,15 @@ Resolving dependencies...
 Downloading packages...
   matcher 0.12.18 (0.12.19 available)
   meta 1.17.0 (1.18.1 available)
+  package_info_plus 8.3.1 (9.0.0 available)
   test_api 0.7.9 (0.7.10 available)
   win32 5.15.0 (6.0.0 available)
   win32_registry 2.1.0 (3.0.2 available)
 Got dependencies!
-5 packages have newer versions incompatible with dependency constraints.
+6 packages have newer versions incompatible with dependency constraints.
 Try `flutter pub outdated` for more information.
 Running Gradle task 'assembleRelease'...                        
 Unblock-File: The filename, directory name, or volume label syntax is incorrect. : 'S:\Manual\flutter\bin\internal\update_engine_version.ps1:Zone.Identifier'.
-Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 7964 bytes (99.5% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
-
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':wallpaper_manager_flutter:verifyReleaseResources'.
-> Cannot access output property 'compiledDirectory' of task ':wallpaper_manager_flutter:verifyReleaseResources'. Accessing unreadable inputs or outputs is not supported. Declare the task as untracked by using Task.doNotTrackState(). For more information, please refer to https://docs.gradle.org/8.13/userguide/incremental_build.html#sec:disable-state-tracking in the Gradle documentation.
-   > Failed to create MD5 hash for file 'S:\Coding\Projects\Goal on Wall\build\wallpaper_manager_flutter\intermediates\verified_library_resources\release\verifyReleaseResources\linked.apk' as it does not exist.
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 8m 51s
-Running Gradle task 'assembleRelease'...                          532.8s
-Gradle task assembleRelease failed with exit code 1
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 7968 bytes (99.5% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Running Gradle task 'assembleRelease'...                          177.6s
+ΓêÜ Built build\app\outputs\flutter-apk\app-release.apk (48.9MB)

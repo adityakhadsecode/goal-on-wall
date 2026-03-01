@@ -128,6 +128,13 @@ lib/
 
 ## 📋 Changelog
 
+### v1.8.0-beta (2026-03-02)
+- ✨ **Cascade Tab Transitions** — Smooth slide + fade animation when switching between bottom navigation tabs for a polished, app-like feel.
+- ✨ **App Version in Settings** — About section now dynamically displays the current app version via `package_info_plus`.
+- ✨ **Support on GitHub** — Replaced "Rate App" with a "Support on GitHub" link that opens the project repository directly.
+- 📦 **New Dependencies** — Added `package_info_plus` and `url_launcher`.
+- 📦 **Version bump** — `1.8.0-beta+9`
+
 ### v1.7.0-beta (2026-03-01)
 - ⚡ **GlassCard Performance** — Removed expensive `BackdropFilter` / `ImageFilter.blur`; replaced with lightweight `BoxShadow` + solid translucent fill for smoother rendering.
 - ⚡ **Life Calendar Repaint Guard** — Added `RepaintBoundary` and proper `shouldRepaint` to the life-calendar custom painter, eliminating unnecessary redraws on scroll.

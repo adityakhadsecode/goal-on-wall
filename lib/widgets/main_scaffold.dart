@@ -18,6 +18,7 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _currentIndex = 0;
+  int _previousIndex = 0;
 
   final List<Widget> _screens = const [
     HomeScreen(),
@@ -32,7 +33,9 @@ class _MainScaffoldState extends State<MainScaffold> {
       _showAddSheet();
       return;
     }
+    if (index == _currentIndex) return;
     setState(() {
+      _previousIndex = _currentIndex;
       _currentIndex = index;
     });
   }
@@ -217,12 +220,37 @@ class _MainScaffoldState extends State<MainScaffold> {
   Widget build(BuildContext context) {
     final palette = context.watch<ThemeProvider>().palette;
 
+    final effectiveIndex = _currentIndex == 2 ? 0 : _currentIndex;
+    final goingForward = _currentIndex > _previousIndex;
+
     return Scaffold(
       backgroundColor: palette.deepBackground,
       extendBody: true,
-      body: IndexedStack(
-        index: _currentIndex == 2 ? 0 : _currentIndex,
-        children: _screens,
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) {
+          // Determine if this child is entering or leaving
+          final isEntering = child.key == ValueKey<int>(effectiveIndex);
+          final slideBegin = isEntering
+              ? Offset(0, goingForward ? 0.08 : -0.08)
+              : Offset(0, goingForward ? -0.08 : 0.08);
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: slideBegin,
+              end: Offset.zero,
+            ).animate(animation),
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          );
+        },
+        child: KeyedSubtree(
+          key: ValueKey<int>(effectiveIndex),
+          child: _screens[effectiveIndex],
+        ),
       ),
       bottomNavigationBar: _buildBottomNav(palette),
     );
