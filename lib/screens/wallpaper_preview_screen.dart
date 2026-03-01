@@ -140,10 +140,6 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
     final palette = themeProvider.palette;
 
     // Colors matching the reference design
-    const bgColor = Color(0xFF0D0D0D);
-    const pastColor = Colors.white;
-    final todayColor = palette.accent;
-    const futureColor = Color(0x1FFFFFFF);
 
     final painter = DotWallpaperPainter(
       data: widget.data,
@@ -214,52 +210,57 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
           ),
 
           // ── Bottom action bar ──────────────────────────────
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-              child: Row(
-                children: [
-                  // Share button
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: Colors.white.withValues(alpha: 0.07),
-                      border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.10)),
-                    ),
-                    child: _isSharing
-                        ? const Center(
-                            child: SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2,
-                                color: Colors.white70,
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: Row(
+                  children: [
+                    // Share button
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white.withValues(alpha: 0.07),
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.10)),
+                      ),
+                      child: _isSharing
+                          ? const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white70,
+                                ),
                               ),
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.share_rounded,
+                                  color: Colors.white70, size: 22),
+                              onPressed: () => _shareWallpaper(palette),
                             ),
-                          )
-                        : IconButton(
-                            icon: const Icon(Icons.share_rounded,
-                                color: Colors.white70, size: 22),
-                            onPressed: () => _shareWallpaper(palette),
-                          ),
-                  ),
+                    ),
 
-                  const SizedBox(width: 14),
+                    const SizedBox(width: 14),
 
-                  // Set as Lock Screen (primary) or iOS message
-                  Expanded(
-                    child: Platform.isAndroid
-                        ? _SetWallpaperButton(
-                            palette: palette,
-                            isLoading: _isSetting,
-                            onTap: () => _setWallpaper(palette),
-                          )
-                        : _IOSWallpaperNote(palette: palette),
-                  ),
-                ],
+                    // Set as Lock Screen (primary) or iOS message
+                    Expanded(
+                      child: Platform.isAndroid
+                          ? _SetWallpaperButton(
+                              palette: palette,
+                              isLoading: _isSetting,
+                              onTap: () => _setWallpaper(palette),
+                            )
+                          : _IOSWallpaperNote(palette: palette),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

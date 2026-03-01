@@ -42,11 +42,14 @@ Choose from **5 powerful calendar types**, each rendered in your preferred visua
 - **Native Resolution Rendering** — Wallpapers are rendered at your device's exact physical pixel dimensions for maximum crispness.
 - **One-Tap Sharing** — Share your progress visually (PNG) and textually via WhatsApp, Instagram, or any other app.
 - **Customization Redirection** — Tweak your active wallpaper anytime; the app remembers your settings and pre-populates the editor.
+- **Edit Saved Calendars** — Tap any calendar in the Edit tab to open its customisation screen with pre-filled data.
 - **Goal Analytics** — A dedicated screen with progress charts, total/passed/remaining days, and a visual timeline.
 - **History & Memory** — Keeps track of your recently generated wallpapers.
 - **Life Calendar** — Visualise your entire life in weeks with an interactive dot grid.
 - **Editable Life Expectancy** — Customise the life expectancy used across all life-calendar calculations from Settings.
-- **Persistent User Preferences** — Birth date and life expectancy are saved and reused automatically across screens.
+- **Editable User Name** — Set your name in Settings — the home screen greeting updates to say "Hii {name}".
+- **Persistent User Preferences** — Birth date, life expectancy, and name are saved and reused automatically across screens.
+- **120Hz / 90Hz Optimised** — Gesture resampling and high-refresh-rate rendering for buttery-smooth scrolling.
 
 ---
 
@@ -125,6 +128,16 @@ lib/
 
 ## 📋 Changelog
 
+### v1.6.0 (2026-03-01)
+- ✨ **Editable User Name** — New PROFILE section in Settings with a bottom sheet to edit your name.
+- ✨ **Dynamic Home Greeting** — Home screen greeting now displays your saved name ("Hii {name} 👋").
+- ✨ **Edit Screen Fix** — Tapping a calendar card in the Edit tab now correctly opens the customisation screen for that wallpaper type.
+- ✨ **Life Calendar Auto-Refresh** — Life calendar tab now reloads preferences every time it's selected, so changes to life expectancy are reflected instantly.
+- 🐛 **Wallpaper Preview Fix** — Bottom action bar (Share + Set as Lock Screen) was mispositioned — now correctly anchored at the bottom.
+- ⚡ **120Hz / 90Hz Support** — Enabled gesture resampling for smoother touch input on high refresh rate displays.
+- 🧹 **Code cleanup** — Removed unused variables, duplicate imports.
+- 📦 **Version bump** — `1.6.0+7`
+
 ### v1.5.0 (2026-03-01)
 - ✨ **Editable Life Expectancy** — Users can now customise the life expectancy value used in the Life Calendar directly from Settings.
 - ✨ **Life Calendar reads user prefs** — Life Calendar screen dynamically uses saved birth date and life expectancy instead of hard-coded defaults.
@@ -151,6 +164,9 @@ lib/
 - [x] Daily automatic background refresh
 - [x] Editable life expectancy in Settings
 - [x] Life Calendar with user preferences
+- [x] Editable user name in Settings
+- [x] Edit saved calendars from Edit tab
+- [x] 120Hz / 90Hz display optimisation
 - [ ] iOS Shortcuts integration
 - [ ] More visual styles (Heatmap, Arc, Timeline)
 - [ ] Cloud backup of configurations

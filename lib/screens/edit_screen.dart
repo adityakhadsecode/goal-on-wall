@@ -5,11 +5,42 @@ import '../providers/wallpaper_provider.dart';
 import '../models/wallpaper_config.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
-import '../widgets/glass_card.dart';
+import 'life_customize_screen.dart';
+import 'year_customize_screen.dart';
+import 'goal_customize_screen.dart';
+import 'product_launch_customize_screen.dart';
+import 'fitness_goal_customize_screen.dart';
 
 
 class EditScreen extends StatelessWidget {
   const EditScreen({super.key});
+
+  void _navigateToCustomize(BuildContext context, WallpaperData data) {
+    Widget screen;
+    switch (data.calendarType) {
+      case CalendarType.life:
+        screen = LifeCustomizeScreen(
+            wallpaperTheme: data.wallpaperTheme, initialData: data);
+        break;
+      case CalendarType.year:
+        screen = YearCustomizeScreen(
+            wallpaperTheme: data.wallpaperTheme, initialData: data);
+        break;
+      case CalendarType.goal:
+        screen = GoalCustomizeScreen(
+            wallpaperTheme: data.wallpaperTheme, initialData: data);
+        break;
+      case CalendarType.productLaunch:
+        screen = ProductLaunchCustomizeScreen(
+            wallpaperTheme: data.wallpaperTheme, initialData: data);
+        break;
+      case CalendarType.fitnessGoal:
+        screen = FitnessGoalCustomizeScreen(
+            wallpaperTheme: data.wallpaperTheme, initialData: data);
+        break;
+    }
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,9 +154,7 @@ class EditScreen extends StatelessWidget {
                         subtitle: data.caption,
                         progress: data.progress,
                         palette: palette,
-                        onTap: () {
-                          // Navigate to preview for that specific data
-                        },
+                        onTap: () => _navigateToCustomize(context, data),
                       );
                     },
                   );

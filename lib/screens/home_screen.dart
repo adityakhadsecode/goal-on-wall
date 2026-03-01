@@ -6,6 +6,7 @@ import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import 'wallpaper_type_screen.dart';
 import '../services/wallpaper_storage.dart';
+import '../services/user_prefs.dart';
 import '../models/wallpaper_config.dart';
 import 'life_customize_screen.dart';
 import 'year_customize_screen.dart';
@@ -27,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _riverController;
   late AnimationController _insightFadeController;
   int _insightIndex = 0;
+  String _userName = 'there';
 
   static const List<String> _insights = [
     '✦  Every day is a brushstroke on your canvas.',
@@ -40,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    _loadUserName();
     _floatingController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 8),
@@ -56,6 +59,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     )..forward();
 
     _scheduleInsightCycle();
+  }
+
+  Future<void> _loadUserName() async {
+    final name = await UserPrefs.getUserName();
+    if (mounted && name != null && name.isNotEmpty) {
+      setState(() => _userName = name);
+    }
   }
 
   void _scheduleInsightCycle() {
@@ -146,6 +156,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 _GreetingHeader(
                   palette: palette,
                   floatController: _floatingController,
+                  userName: _userName,
                 ),
 
                 const SizedBox(height: 28),
@@ -194,10 +205,12 @@ class _GreetingHeader extends StatelessWidget {
   const _GreetingHeader({
     required this.palette,
     required this.floatController,
+    required this.userName,
   });
 
   final dynamic palette;
   final AnimationController floatController;
+  final String userName;
 
   @override
   Widget build(BuildContext context) {
@@ -219,9 +232,9 @@ class _GreetingHeader extends StatelessWidget {
                   stops: const [0.55, 1.0],
                 ).createShader(bounds),
                 blendMode: BlendMode.srcIn,
-                child: const Text(
-                  'Hii Aditya 👋',
-                  style: TextStyle(
+                child: Text(
+                  'Hii $userName 👋',
+                  style: const TextStyle(
                     fontSize: 30,
                     fontWeight: FontWeight.w700,
                     letterSpacing: -0.5,

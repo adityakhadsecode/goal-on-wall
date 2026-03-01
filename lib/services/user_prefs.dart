@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class UserPrefs {
   static const _keyBirthDate = 'gow_birthDate';
   static const _keyLifeExpectancy = 'gow_lifeExpectancy';
+  static const _keyUserName = 'gow_userName';
   static const int defaultLifeExpectancy = 80;
 
   /// Returns the saved [DateTime] birthdate, or `null` if none is saved.
@@ -40,5 +41,17 @@ class UserPrefs {
   static Future<void> saveLifeExpectancy(int years) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_keyLifeExpectancy, years);
+  }
+
+  /// Returns the saved user name, or `null` if none is saved.
+  static Future<String?> getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_keyUserName);
+  }
+
+  /// Saves the user's display name.
+  static Future<void> saveUserName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyUserName, name);
   }
 }

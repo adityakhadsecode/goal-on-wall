@@ -18,13 +18,15 @@ class MainScaffold extends StatefulWidget {
 
 class _MainScaffoldState extends State<MainScaffold> {
   int _currentIndex = 0;
+  int _lifeCalendarRefreshKey = 0;
+  int _homeRefreshKey = 0;
 
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    EditScreen(),
-    SizedBox(), // placeholder for center button
-    LifeCalendarScreen(),
-    SettingsScreen(),
+  List<Widget> get _screens => [
+    HomeScreen(key: ValueKey('home_$_homeRefreshKey')),
+    const EditScreen(),
+    const SizedBox(), // placeholder for center button
+    LifeCalendarScreen(key: ValueKey('life_$_lifeCalendarRefreshKey')),
+    const SettingsScreen(),
   ];
 
   void _onTabTapped(int index) {
@@ -32,7 +34,11 @@ class _MainScaffoldState extends State<MainScaffold> {
       _showAddSheet();
       return;
     }
-    setState(() => _currentIndex = index);
+    setState(() {
+      _currentIndex = index;
+      if (index == 3) _lifeCalendarRefreshKey++;
+      if (index == 0) _homeRefreshKey++;
+    });
   }
 
   void _showAddSheet() {

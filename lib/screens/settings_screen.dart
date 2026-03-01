@@ -16,12 +16,14 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> {
   DateTime? _savedBirthDate;
   int _lifeExpectancy = UserPrefs.defaultLifeExpectancy;
+  String _userName = '';
 
   @override
   void initState() {
     super.initState();
     _loadBirthDate();
     _loadLifeExpectancy();
+    _loadUserName();
   }
 
   Future<void> _loadBirthDate() async {
@@ -32,6 +34,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Future<void> _loadLifeExpectancy() async {
     final years = await UserPrefs.getLifeExpectancy();
     if (mounted) setState(() => _lifeExpectancy = years);
+  }
+
+  Future<void> _loadUserName() async {
+    final name = await UserPrefs.getUserName();
+    if (mounted) setState(() => _userName = name ?? '');
   }
 
   String get _birthDateLabel {
@@ -104,6 +111,31 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+  void _showNameSheet(AppColorPalette palette) {
+    final ctrl = TextEditingController(text: _userName);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+          ),
+          child: _NameSheet(
+            palette: palette,
+            controller: ctrl,
+            onSave: (name) async {
+              await UserPrefs.saveUserName(name);
+              if (mounted) setState(() => _userName = name);
+            },
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
@@ -152,6 +184,35 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 children: [
+                  // Profile section
+                  Text(
+                    'PROFILE',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 2,
+                      color: palette.textMuted,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  GlassCard(
+                    borderRadius: 20,
+                    padding: const EdgeInsets.all(4),
+                    child: Column(
+                      children: [
+                        _buildTappableSettingsItem(
+                          'Name',
+                          _userName.isEmpty ? 'Not set' : _userName,
+                          Icons.person_rounded,
+                          palette,
+                          onTap: () => _showNameSheet(palette),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 24),
+
                   // Theme section
                   Text(
                     'THEME',
@@ -949,6 +1010,153 @@ class _LifeExpectancySheetState extends State<_LifeExpectancySheet> {
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
+              filled: true,
+              fillColor: Colors.white.withValues(alpha: 0.05),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.1), width: 1),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.1), width: 1),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: p.primaryLight, width: 1.5),
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+            ),
+          ),
+
+          const SizedBox(height: 24),
+
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: _isValid && !_saving ? _save : null,
+              style: FilledButton.styleFrom(
+                backgroundColor: p.primaryLight,
+                disabledBackgroundColor: p.primaryLight.withValues(alpha: 0.3),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16)),
+              ),
+              child: _saving
+                  ? SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : Text(
+                      'Save',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Name Edit Bottom Sheet
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _NameSheet extends StatefulWidget {
+  const _NameSheet({
+    required this.palette,
+    required this.controller,
+    required this.onSave,
+  });
+
+  final AppColorPalette palette;
+  final TextEditingController controller;
+  final Future<void> Function(String) onSave;
+
+  @override
+  State<_NameSheet> createState() => _NameSheetState();
+}
+
+class _NameSheetState extends State<_NameSheet> {
+  bool _saving = false;
+
+  bool get _isValid => widget.controller.text.trim().isNotEmpty;
+
+  Future<void> _save() async {
+    if (!_isValid) return;
+    setState(() => _saving = true);
+    await widget.onSave(widget.controller.text.trim());
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = widget.palette;
+    return Container(
+      decoration: BoxDecoration(
+        color: p.cardBackground,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Drag handle
+          Container(
+            width: 36,
+            height: 4,
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(2),
+            ),
+          ),
+
+          Row(
+            children: [
+              Icon(Icons.person_rounded, color: p.primaryLight, size: 22),
+              const SizedBox(width: 10),
+              Text(
+                'Your Name',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: p.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Shown on the home screen greeting',
+            style: TextStyle(fontSize: 12, color: p.textMuted),
+          ),
+          const SizedBox(height: 24),
+
+          TextFormField(
+            controller: widget.controller,
+            textCapitalization: TextCapitalization.words,
+            maxLength: 30,
+            onChanged: (_) => setState(() {}),
+            style: TextStyle(
+              color: p.textPrimary,
+              fontWeight: FontWeight.w600,
+              fontSize: 18,
+            ),
+            decoration: InputDecoration(
+              hintText: 'Enter your name',
+              hintStyle: TextStyle(color: p.textMuted, fontSize: 18),
+              counterText: '',
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.05),
               border: OutlineInputBorder(
