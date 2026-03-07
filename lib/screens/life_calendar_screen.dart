@@ -13,7 +13,7 @@ class LifeCalendarScreen extends StatefulWidget {
 }
 
 class _LifeCalendarScreenState extends State<LifeCalendarScreen> {
-  int _lifeExpectancy = UserPrefs.defaultLifeExpectancy;
+  static const int _lifeExpectancy = 80;
   DateTime? _birthDate;
   bool _loaded = false;
 
@@ -24,15 +24,64 @@ class _LifeCalendarScreenState extends State<LifeCalendarScreen> {
   }
 
   Future<void> _loadPrefs() async {
-    final years = await UserPrefs.getLifeExpectancy();
     final birth = await UserPrefs.getBirthDate();
     if (mounted) {
       setState(() {
-        _lifeExpectancy = years;
         _birthDate = birth;
         _loaded = true;
       });
     }
+  }
+
+  void _showInfoPopup() {
+    final palette = context.read<ThemeProvider>().palette;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: palette.cardBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.info_outline_rounded, color: palette.primaryLight, size: 22),
+            const SizedBox(width: 10),
+            Text(
+              'Life Calendar',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: palette.textPrimary,
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Each dot represents one week of your life.\n\n'
+          '● Filled dots are weeks you\'ve already lived.\n'
+          '○ Empty dots are weeks remaining.\n\n'
+          'This visualization helps you appreciate and make the most of your time.',
+          style: TextStyle(
+            fontSize: 13,
+            color: palette.textSecondary,
+            height: 1.5,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              'Got it',
+              style: TextStyle(
+                color: palette.primaryLight,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -44,7 +93,7 @@ class _LifeCalendarScreenState extends State<LifeCalendarScreen> {
     final ageInWeeks = now.difference(birthDate).inDays ~/ 7;
     final totalWeeks = _lifeExpectancy * 52;
     final ageInYears = now.difference(birthDate).inDays ~/ 365;
-    final percentage = ((ageInWeeks / totalWeeks) * 100).round();
+    final daysLived = now.difference(birthDate).inDays;
 
     if (!_loaded) {
       return OrganicBackground(
@@ -89,20 +138,23 @@ class _LifeCalendarScreenState extends State<LifeCalendarScreen> {
                       ),
                     ],
                   ),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.05),
-                      border: Border.all(
+                  GestureDetector(
+                    onTap: _showInfoPopup,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
                         color: Colors.white.withValues(alpha: 0.05),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.05),
+                        ),
                       ),
-                    ),
-                    child: Icon(
-                      Icons.info_outline_rounded,
-                      color: palette.textSecondary,
-                      size: 20,
+                      child: Icon(
+                        Icons.info_outline_rounded,
+                        color: palette.textSecondary,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -130,7 +182,7 @@ class _LifeCalendarScreenState extends State<LifeCalendarScreen> {
                       height: 32,
                       color: Colors.white.withValues(alpha: 0.1),
                     ),
-                    _buildStat('Progress', '$percentage%', palette),
+                    _buildStat('Days Lived', '$daysLived', palette),
                   ],
                 ),
               ),

@@ -7,6 +7,7 @@ import 'package:workmanager/workmanager.dart';
 import 'theme/theme_provider.dart';
 import 'widgets/main_scaffold.dart';
 import 'services/background_task.dart';
+import 'services/user_prefs.dart';
 import 'providers/wallpaper_provider.dart';
 
 void main() async {
@@ -24,15 +25,18 @@ void main() async {
   );
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
-  // Register daily wallpaper refresh with WorkManager
+  // Register daily wallpaper refresh with WorkManager only if enabled
   await Workmanager().initialize(callbackDispatcher);
-  await Workmanager().registerPeriodicTask(
-    'daily-wallpaper-refresh',
-    refreshWallpaperTask,
-    frequency: const Duration(hours: 24),
-    constraints: Constraints(networkType: NetworkType.notRequired),
-    existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-  );
+  final autoSet = await UserPrefs.getAutoSetWallpaper();
+  if (autoSet) {
+    await Workmanager().registerPeriodicTask(
+      'daily-wallpaper-refresh',
+      refreshWallpaperTask,
+      frequency: const Duration(hours: 24),
+      constraints: Constraints(networkType: NetworkType.notRequired),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+    );
+  }
 
   runApp(const GoalOnWallApp());
 }

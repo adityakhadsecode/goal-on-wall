@@ -51,9 +51,10 @@ class _MainScaffoldState extends State<MainScaffold> {
       builder: (ctx) {
         return Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               Container(
                 width: 40,
                 height: 4,
@@ -143,7 +144,8 @@ class _MainScaffoldState extends State<MainScaffold> {
                 },
               ),
               const SizedBox(height: 24),
-            ],
+              ],
+            ),
           ),
         );
       },

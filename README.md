@@ -45,10 +45,11 @@ Choose from **5 powerful calendar types**, each rendered in your preferred visua
 - **Edit Saved Calendars** — Tap any calendar in the Edit tab to open its customisation screen with pre-filled data.
 - **Goal Analytics** — A dedicated screen with progress charts, total/passed/remaining days, and a visual timeline.
 - **History & Memory** — Keeps track of your recently generated wallpapers.
-- **Life Calendar** — Visualise your entire life in weeks with an interactive dot grid.
-- **Editable Life Expectancy** — Customise the life expectancy used across all life-calendar calculations from Settings.
+- **Life Calendar** — Visualise your entire life in weeks with an interactive dot grid and days-lived stats.
+- **Searchable Edit Screen** — Filter your saved calendars by name, caption, or type with the built-in search.
+- **Auto-Set Wallpaper Toggle** — Enable or disable the daily automatic wallpaper refresh from Settings.
 - **Editable User Name** — Set your name in Settings — the home screen greeting updates to say "Hii {name}".
-- **Persistent User Preferences** — Birth date, life expectancy, and name are saved and reused automatically across screens.
+- **Persistent User Preferences** — Birth date, name, and wallpaper preferences are saved and reused automatically across screens.
 - **120Hz / 90Hz Optimised** — Gesture resampling and high-refresh-rate rendering for buttery-smooth scrolling.
 
 ---
@@ -115,7 +116,7 @@ lib/
 │   └── theme_provider.dart
 ├── services/
 │   ├── background_task.dart        # Daily refresh dispatcher
-│   ├── user_prefs.dart            # User preferences (birth date, life expectancy)
+│   ├── user_prefs.dart            # User preferences (birth date, auto-wallpaper)
 │   ├── wallpaper_service.dart     # PNG rendering (Native Resolution)
 │   └── wallpaper_storage.dart     # SharedPreferences persistence
 └── widgets/
@@ -127,6 +128,16 @@ lib/
 ---
 
 ## 📋 Changelog
+
+### v1.9.0-beta (2026-03-07)
+- 🐛 **Scrollable Create-New Sheet** — The plus-button bottom sheet is now scrollable on smaller screens.
+- ✨ **Searchable Edit Screen** — Tap the search icon to filter saved calendars by name, caption, or type.
+- ✨ **Life Calendar Info Popup** — The ⓘ button now shows an explanation of what the life calendar visualisation represents.
+- ✨ **Days Lived Stat** — Replaced "Progress %" with "Days Lived" in the life calendar stats row.
+- 🔧 **Removed Life Expectancy** — Life expectancy setting removed entirely; life grid uses a fixed 80-year span.
+- 🐛 **Auto-Set Wallpaper Toggle** — The toggle now persists and actually enables/disables the daily WorkManager task.
+- 🐛 **GitHub Button Fix** — Removed pencil icon, replaced with open-in-new icon; fixed URL launch that could silently fail.
+- 📦 **Version bump** — `1.9.0-beta+10`
 
 ### v1.8.0-beta (2026-03-02)
 - ✨ **Cascade Tab Transitions** — Smooth slide + fade animation when switching between bottom navigation tabs for a polished, app-like feel.
@@ -177,12 +188,13 @@ lib/
 - [x] Detailed Analytics & Timeline view
 - [x] One-tap Sharing system
 - [x] Daily automatic background refresh
-- [x] Editable life expectancy in Settings
 - [x] Life Calendar with user preferences
 - [x] Editable user name in Settings
 - [x] Edit saved calendars from Edit tab
 - [x] 120Hz / 90Hz display optimisation
 - [x] Animation & rendering performance optimisation
+- [x] Searchable edit screen
+- [x] Auto-set wallpaper toggle (persisted)
 - [ ] iOS Shortcuts integration
 - [ ] More visual styles (Heatmap, Arc, Timeline)
 - [ ] Cloud backup of configurations

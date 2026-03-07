@@ -12,8 +12,25 @@ import 'product_launch_customize_screen.dart';
 import 'fitness_goal_customize_screen.dart';
 
 
-class EditScreen extends StatelessWidget {
+class EditScreen extends StatefulWidget {
   const EditScreen({super.key});
+
+  @override
+  State<EditScreen> createState() => _EditScreenState();
+}
+
+class _EditScreenState extends State<EditScreen> {
+  bool _isSearching = false;
+  String _searchQuery = '';
+  final _searchController = TextEditingController();
+  final _searchFocusNode = FocusNode();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _searchFocusNode.dispose();
+    super.dispose();
+  }
 
   void _navigateToCustomize(BuildContext context, WallpaperData data) {
     Widget screen;
@@ -42,6 +59,35 @@ class EditScreen extends StatelessWidget {
     Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
   }
 
+  String _getTitleForType(CalendarType type) {
+    switch (type) {
+      case CalendarType.life: return 'Life Calendar';
+      case CalendarType.year: return 'Year Calendar';
+      case CalendarType.goal: return 'Goal Calendar';
+      case CalendarType.productLaunch: return 'Product Launch';
+      case CalendarType.fitnessGoal: return 'Fitness Goal';
+    }
+  }
+
+  IconData _getIconForType(CalendarType type) {
+    switch (type) {
+      case CalendarType.life: return Icons.grid_view_rounded;
+      case CalendarType.year: return Icons.calendar_view_day_rounded;
+      case CalendarType.goal: return Icons.flag_rounded;
+      case CalendarType.productLaunch: return Icons.rocket_launch_rounded;
+      case CalendarType.fitnessGoal: return Icons.fitness_center_rounded;
+    }
+  }
+
+  bool _matchesSearch(WallpaperData data) {
+    if (_searchQuery.isEmpty) return true;
+    final query = _searchQuery.toLowerCase();
+    final title = (data.label ?? _getTitleForType(data.calendarType)).toLowerCase();
+    final caption = data.caption.toLowerCase();
+    final typeName = _getTitleForType(data.calendarType).toLowerCase();
+    return title.contains(query) || caption.contains(query) || typeName.contains(query);
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<ThemeProvider>().palette;
@@ -57,44 +103,92 @@ class EditScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Your Calendars',
+                  if (!_isSearching) ...[
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Your Calendars',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: palette.textPrimary,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'MANAGE & EDIT',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w300,
+                            color: palette.textMuted,
+                            letterSpacing: 3,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                  if (_isSearching)
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        focusNode: _searchFocusNode,
+                        onChanged: (val) => setState(() => _searchQuery = val),
                         style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w700,
                           color: palette.textPrimary,
-                          letterSpacing: -0.5,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
                         ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        'MANAGE & EDIT',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w300,
-                          color: palette.textMuted,
-                          letterSpacing: 3,
+                        decoration: InputDecoration(
+                          hintText: 'Search calendars...',
+                          hintStyle: TextStyle(
+                            color: palette.textMuted,
+                            fontSize: 16,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                            horizontal: 4,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.05),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.05),
                       ),
                     ),
-                    child: Icon(
-                      Icons.search_rounded,
-                      color: palette.textSecondary,
-                      size: 20,
+                  GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (_isSearching) {
+                          _isSearching = false;
+                          _searchQuery = '';
+                          _searchController.clear();
+                        } else {
+                          _isSearching = true;
+                          // Focus the search field after it builds
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            _searchFocusNode.requestFocus();
+                          });
+                        }
+                      });
+                    },
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _isSearching
+                            ? palette.primary.withValues(alpha: 0.3)
+                            : Colors.white.withValues(alpha: 0.05),
+                        border: Border.all(
+                          color: _isSearching
+                              ? palette.primaryLight.withValues(alpha: 0.3)
+                              : Colors.white.withValues(alpha: 0.05),
+                        ),
+                      ),
+                      child: Icon(
+                        _isSearching ? Icons.close_rounded : Icons.search_rounded,
+                        color: _isSearching ? palette.primaryLight : palette.textSecondary,
+                        size: 20,
+                      ),
                     ),
                   ),
                 ],
@@ -141,12 +235,38 @@ class EditScreen extends StatelessWidget {
                     );
                   }
 
+                  final filtered = savedWallpapers.where(_matchesSearch).toList();
+
+                  if (filtered.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.search_off_rounded,
+                            size: 64,
+                            color: palette.textMuted.withValues(alpha: 0.2),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'No matching calendars',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: palette.textMuted,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   return ListView.separated(
                     padding: const EdgeInsets.fromLTRB(24, 0, 24, 100),
-                    itemCount: savedWallpapers.length,
+                    itemCount: filtered.length,
                     separatorBuilder: (context, index) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
-                      final data = savedWallpapers[index];
+                      final data = filtered[index];
                       return _buildCalendarCard(
                         context,
                         icon: _getIconForType(data.calendarType),
@@ -165,28 +285,6 @@ class EditScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-
-
-  IconData _getIconForType(CalendarType type) {
-    switch (type) {
-      case CalendarType.life: return Icons.grid_view_rounded;
-      case CalendarType.year: return Icons.calendar_view_day_rounded;
-      case CalendarType.goal: return Icons.flag_rounded;
-      case CalendarType.productLaunch: return Icons.rocket_launch_rounded;
-      case CalendarType.fitnessGoal: return Icons.fitness_center_rounded;
-    }
-  }
-
-  String _getTitleForType(CalendarType type) {
-    switch (type) {
-      case CalendarType.life: return 'Life Calendar';
-      case CalendarType.year: return 'Year Calendar';
-      case CalendarType.goal: return 'Goal Calendar';
-      case CalendarType.productLaunch: return 'Product Launch';
-      case CalendarType.fitnessGoal: return 'Fitness Goal';
-    }
   }
 
   Widget _buildCalendarCard(
