@@ -7,6 +7,7 @@ import '../theme/theme_provider.dart';
 import '../models/wallpaper_config.dart';
 import '../providers/wallpaper_provider.dart';
 import '../painters/dot_wallpaper_painter.dart';
+import '../painters/flow_wallpaper_painter.dart';
 import '../services/wallpaper_service.dart';
 import '../services/wallpaper_storage.dart';
 
@@ -308,18 +309,34 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
     final themeProvider = context.watch<ThemeProvider>();
     final palette = themeProvider.palette;
 
-    final painter = DotWallpaperPainter(
-      data: widget.data,
-      pastColor: Colors.white,
-      todayColor: palette.accent,
-      futureColor: Colors.white.withValues(alpha: 0.12),
-      bgColor: const Color(0xFF0D0D0D),
-      labelColor: palette.primaryLight,
-      monthLabelColor: palette.textMuted,
-      showCaption: _showCaption,
-      showTodayGlow: _showTodayGlow,
-      showPercent: _showPercent,
-    );
+    final CustomPainter painter;
+    if (widget.data.wallpaperTheme == WallpaperTheme.flow) {
+      painter = FlowWallpaperPainter(
+        data: widget.data,
+        pastColor: Colors.white,
+        todayColor: palette.accent,
+        futureColor: Colors.white.withValues(alpha: 0.12),
+        bgColor: const Color(0xFF0D0D0D),
+        labelColor: palette.primaryLight,
+        monthLabelColor: palette.textMuted,
+        showCaption: _showCaption,
+        showTodayGlow: _showTodayGlow,
+        showPercent: _showPercent,
+      );
+    } else {
+      painter = DotWallpaperPainter(
+        data: widget.data,
+        pastColor: Colors.white,
+        todayColor: palette.accent,
+        futureColor: Colors.white.withValues(alpha: 0.12),
+        bgColor: const Color(0xFF0D0D0D),
+        labelColor: palette.primaryLight,
+        monthLabelColor: palette.textMuted,
+        showCaption: _showCaption,
+        showTodayGlow: _showTodayGlow,
+        showPercent: _showPercent,
+      );
+    }
 
     return Scaffold(
       backgroundColor: Colors.black,

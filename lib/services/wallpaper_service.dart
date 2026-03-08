@@ -8,6 +8,7 @@ import 'package:wallpaper_manager_flutter/wallpaper_manager_flutter.dart';
 
 import '../models/wallpaper_config.dart';
 import '../painters/dot_wallpaper_painter.dart';
+import '../painters/flow_wallpaper_painter.dart';
 
 /// Renders [WallpaperData] to a PNG image and sets it as the Android lock screen.
 class WallpaperService {
@@ -29,15 +30,28 @@ class WallpaperService {
       Rect.fromLTWH(0, 0, width, height),
     );
 
-    final painter = DotWallpaperPainter(
-      data: data,
-      pastColor: pastColor,
-      todayColor: todayColor,
-      futureColor: futureColor,
-      bgColor: bgColor,
-      labelColor: labelColor,
-      monthLabelColor: monthLabelColor,
-    );
+    final CustomPainter painter;
+    if (data.wallpaperTheme == WallpaperTheme.flow) {
+      painter = FlowWallpaperPainter(
+        data: data,
+        pastColor: pastColor,
+        todayColor: todayColor,
+        futureColor: futureColor,
+        bgColor: bgColor,
+        labelColor: labelColor,
+        monthLabelColor: monthLabelColor,
+      );
+    } else {
+      painter = DotWallpaperPainter(
+        data: data,
+        pastColor: pastColor,
+        todayColor: todayColor,
+        futureColor: futureColor,
+        bgColor: bgColor,
+        labelColor: labelColor,
+        monthLabelColor: monthLabelColor,
+      );
+    }
 
     painter.paint(canvas, Size(width, height));
 

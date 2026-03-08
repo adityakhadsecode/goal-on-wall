@@ -17,7 +17,7 @@ Goal on Wall is a Flutter app that generates stunning, personalised wallpapers �
 
 ## ✨ What Is It?
 
-Every day you unlock your phone dozens of times. Goal on Wall turns that moment into a silent motivator — a beautiful, data-driven wallpaper showing exactly where you are in life, the year, or your journey toward a goal. 
+Every day you unlock your phone dozens of times. Goal on Wall turns that moment into a silent motivator — a beautiful, data-driven wallpaper showing exactly where you are in life, the year, or your journey toward a goal.
 
 Now featuring a **Dynamic Home Screen** that shows your active goal's progress at a glance, and a **Detailed Analytics Dashboard** to dive deep into your metrics.
 
@@ -27,13 +27,13 @@ Now featuring a **Dynamic Home Screen** that shows your active goal's progress a
 
 Choose from **5 powerful calendar types**, each rendered in your preferred visual style:
 
-| Type | Icon | What it shows |
-|---|---|---|
-| **Life Calendar** | 🟩 | Every week of your life — filled vs remaining |
-| **Year Calendar** | 📅 | Days / Months / Quarters of the current year |
-| **Goal Calendar** | 🎯 | Countdown from start to your personal deadline |
-| **Product Launch** | 🚀 | Days until your big launch day |
-| **Fitness Goal** | 💪 | Training days until your event or race |
+| Type               | Icon | What it shows                                  |
+| ------------------ | ---- | ---------------------------------------------- |
+| **Life Calendar**  | 🟩   | Every week of your life — filled vs remaining  |
+| **Year Calendar**  | 📅   | Days / Months / Quarters of the current year   |
+| **Goal Calendar**  | 🎯   | Countdown from start to your personal deadline |
+| **Product Launch** | 🚀   | Days until your big launch day                 |
+| **Fitness Goal**   | 💪   | Training days until your event or race         |
 
 ---
 
@@ -58,10 +58,10 @@ Choose from **5 powerful calendar types**, each rendered in your preferred visua
 
 Each wallpaper type ships with two distinct looks:
 
-| Style | Description |
-|---|---|
+| Style        | Description                                                           |
+| ------------ | --------------------------------------------------------------------- |
 | **The Flow** | An organic river path that grows as you progress — inspired by nature |
-| **Dots** | A crisp grid of dots where filled circles mark time already lived |
+| **Dots**     | A crisp grid of dots where filled circles mark time already lived     |
 
 ---
 
@@ -129,7 +129,18 @@ lib/
 
 ## 📋 Changelog
 
+### v1.10.0-beta (2026-03-08)
+
+- ✨ **"The Flow" Wallpaper Style** — Fully implemented winding river path painter with gradient stroke, milestone markers, shimmer particles, and today's glow dot.
+- ✨ **Android Device Frame** — Wallpaper preview now uses an Android-style frame with punch-hole camera, side buttons (power/volume), and bottom nav indicator.
+- ✨ **Calendar Select & Delete** — Edit button in "Your Calendars" toggles selection mode with checkboxes and a floating delete bar with confirmation dialog.
+- ✨ **Set as Both Screens** — "Set as Both" now persists the screen target so the daily background refresh correctly updates both lock and home screens.
+- ✨ **Wallpaper Customization Menu** — Toggle caption text, today's dot glow, and percentage display from the preview screen.
+- 🔧 **Share Button Relocated** — Moved from bottom action bar to the AppBar for cleaner layout.
+- 📦 **Version bump** — `1.10.0-beta+11`
+
 ### v1.9.0-beta (2026-03-07)
+
 - 🐛 **Scrollable Create-New Sheet** — The plus-button bottom sheet is now scrollable on smaller screens.
 - ✨ **Searchable Edit Screen** — Tap the search icon to filter saved calendars by name, caption, or type.
 - ✨ **Life Calendar Info Popup** — The ⓘ button now shows an explanation of what the life calendar visualisation represents.
@@ -140,6 +151,7 @@ lib/
 - 📦 **Version bump** — `1.9.0-beta+10`
 
 ### v1.8.0-beta (2026-03-02)
+
 - ✨ **Cascade Tab Transitions** — Smooth slide + fade animation when switching between bottom navigation tabs for a polished, app-like feel.
 - ✨ **App Version in Settings** — About section now dynamically displays the current app version via `package_info_plus`.
 - ✨ **Support on GitHub** — Replaced "Rate App" with a "Support on GitHub" link that opens the project repository directly.
@@ -147,6 +159,7 @@ lib/
 - 📦 **Version bump** — `1.8.0-beta+9`
 
 ### v1.7.0-beta (2026-03-01)
+
 - ⚡ **GlassCard Performance** — Removed expensive `BackdropFilter` / `ImageFilter.blur`; replaced with lightweight `BoxShadow` + solid translucent fill for smoother rendering.
 - ⚡ **Life Calendar Repaint Guard** — Added `RepaintBoundary` and proper `shouldRepaint` to the life-calendar custom painter, eliminating unnecessary redraws on scroll.
 - ⚡ **DotGrid Repaint Guard** — Added `shouldRepaint` override to the dot-grid painter so it only repaints when data actually changes.
@@ -155,6 +168,7 @@ lib/
 - 📦 **Version bump** — `1.7.0-beta+8`
 
 ### v1.6.0 (2026-03-01)
+
 - ✨ **Editable User Name** — New PROFILE section in Settings with a bottom sheet to edit your name.
 - ✨ **Dynamic Home Greeting** — Home screen greeting now displays your saved name ("Hii {name} 👋").
 - ✨ **Edit Screen Fix** — Tapping a calendar card in the Edit tab now correctly opens the customisation screen for that wallpaper type.
@@ -165,6 +179,7 @@ lib/
 - 📦 **Version bump** — `1.6.0+7`
 
 ### v1.5.0 (2026-03-01)
+
 - ✨ **Editable Life Expectancy** — Users can now customise the life expectancy value used in the Life Calendar directly from Settings.
 - ✨ **Life Calendar reads user prefs** — Life Calendar screen dynamically uses saved birth date and life expectancy instead of hard-coded defaults.
 - ✨ **UserPrefs service** — New `user_prefs.dart` service for managing persistent user preferences (birth date, life expectancy).
@@ -173,9 +188,11 @@ lib/
 - 📦 **Version bump** — `1.5.0+6`
 
 ### v1.4.1 (Previous)
+
 - Minor bug fixes and stability improvements.
 
 ### v1.3.0
+
 - Analytics & Sharing release with detailed goal metrics and one-tap share.
 
 ---
@@ -195,6 +212,11 @@ lib/
 - [x] Animation & rendering performance optimisation
 - [x] Searchable edit screen
 - [x] Auto-set wallpaper toggle (persisted)
+- [x] "The Flow" wallpaper style
+- [x] Android device frame preview
+- [x] Calendar select & delete
+- [x] Set wallpaper on both screens (with daily refresh)
+- [x] Wallpaper customization toggles
 - [ ] iOS Shortcuts integration
 - [ ] More visual styles (Heatmap, Arc, Timeline)
 - [ ] Cloud backup of configurations
@@ -224,6 +246,6 @@ Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information
 
 Made with 💚 by [Aditya Khadse](https://github.com/adityakhadsecode)
 
-*Every week is a dot. Make them count.*
+_Every week is a dot. Make them count._
 
 </div>
