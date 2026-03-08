@@ -16,6 +16,9 @@ class DotWallpaperPainter extends CustomPainter {
     required this.bgColor,
     required this.labelColor,
     required this.monthLabelColor,
+    this.showCaption = true,
+    this.showTodayGlow = true,
+    this.showPercent = true,
   });
 
   final WallpaperData data;
@@ -25,6 +28,9 @@ class DotWallpaperPainter extends CustomPainter {
   final Color bgColor;
   final Color labelColor;
   final Color monthLabelColor;
+  final bool showCaption;
+  final bool showTodayGlow;
+  final bool showPercent;
 
   bool get _isYearLayout => data.calendarType == CalendarType.year;
 
@@ -39,7 +45,7 @@ class DotWallpaperPainter extends CustomPainter {
       _paintFlatLayout(canvas, size);
     }
 
-    _paintCaption(canvas, size);
+    if (showCaption) _paintCaption(canvas, size);
   }
 
   // ── Flat layout ──────────────────────────────────────────────
@@ -78,7 +84,7 @@ class DotWallpaperPainter extends CustomPainter {
       canvas.drawCircle(Offset(cx, cy), dotRadius, paint);
 
       // glow on today dot
-      if (i == elapsed) {
+      if (i == elapsed && showTodayGlow) {
         final glowPaint = Paint()
           ..color = todayColor.withValues(alpha: 0.35)
           ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 6);
@@ -165,7 +171,7 @@ class DotWallpaperPainter extends CustomPainter {
 
         canvas.drawCircle(Offset(cx, cy), dotR, Paint()..color = color);
 
-        if (isToday) {
+        if (isToday && showTodayGlow) {
           final glowPaint = Paint()
             ..color = todayColor.withValues(alpha: 0.4)
             ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
@@ -187,7 +193,10 @@ class DotWallpaperPainter extends CustomPainter {
       color: labelColor,
       letterSpacing: 0.5,
     );
-    final text = data.caption;
+    // Build caption text based on showPercent toggle
+    final text = showPercent
+        ? data.caption
+        : '${data.daysLeft}d left';
     final tp = _buildTextPainter(text, style, size.width);
     final x = (size.width - tp.width) / 2;
     final y = size.height * 0.87;
@@ -217,5 +226,8 @@ class DotWallpaperPainter extends CustomPainter {
       old.data != data ||
       old.pastColor != pastColor ||
       old.todayColor != todayColor ||
-      old.futureColor != futureColor;
+      old.futureColor != futureColor ||
+      old.showCaption != showCaption ||
+      old.showTodayGlow != showTodayGlow ||
+      old.showPercent != showPercent;
 }

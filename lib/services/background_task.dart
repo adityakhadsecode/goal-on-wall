@@ -30,7 +30,12 @@ void callbackDispatcher() {
           height: saved.height,
         );
 
-        await WallpaperService.setAsLockScreen(pngBytes);
+        // Apply to the correct screen(s) based on user's last choice
+        if (saved.screenTarget == 'both') {
+          await WallpaperService.setAsBothScreens(pngBytes);
+        } else {
+          await WallpaperService.setAsLockScreen(pngBytes);
+        }
       } catch (_) {
         // Silently swallow — WorkManager will retry on next schedule.
       }

@@ -67,6 +67,26 @@ class WallpaperService {
       );
     }
   }
+
+  /// Sets wallpaper on both lock screen and home screen.
+  static Future<void> setAsBothScreens(Uint8List pngBytes) async {
+    if (!Platform.isAndroid) {
+      throw WallpaperServiceException(
+        'Setting wallpaper is only supported on Android.',
+      );
+    }
+    try {
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/gow_wallpaper.png');
+      await file.writeAsBytes(pngBytes);
+      await WallpaperManagerFlutter()
+          .setWallpaper(file, WallpaperManagerFlutter.bothScreens);
+    } catch (e) {
+      throw WallpaperServiceException(
+        'Could not set wallpaper: ${e.toString()}',
+      );
+    }
+  }
 }
 
 class WallpaperServiceException implements Exception {

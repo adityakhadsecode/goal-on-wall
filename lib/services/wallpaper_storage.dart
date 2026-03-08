@@ -14,6 +14,7 @@ class WallpaperStorage {
   static const _keyMonthLabelColor = 'gow_monthLabelColor';
   static const _keyWidth = 'gow_width';
   static const _keyHeight = 'gow_height';
+  static const _keyScreenTarget = 'gow_screenTarget';
 
   static Future<void> save({
     required WallpaperData data,
@@ -22,6 +23,7 @@ class WallpaperStorage {
     required int monthLabelColor,
     required double width,
     required double height,
+    String screenTarget = 'lock',
   }) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_keyCalendarType, data.calendarType.index);
@@ -38,6 +40,7 @@ class WallpaperStorage {
     await prefs.setInt(_keyMonthLabelColor, monthLabelColor);
     await prefs.setDouble(_keyWidth, width);
     await prefs.setDouble(_keyHeight, height);
+    await prefs.setString(_keyScreenTarget, screenTarget);
   }
 
   static Future<SavedWallpaperConfig?> load() async {
@@ -67,6 +70,7 @@ class WallpaperStorage {
       monthLabelColor: prefs.getInt(_keyMonthLabelColor) ?? 0xFF888888,
       width: prefs.getDouble(_keyWidth) ?? 1080.0,
       height: prefs.getDouble(_keyHeight) ?? 2340.0,
+      screenTarget: prefs.getString(_keyScreenTarget) ?? 'lock',
     );
   }
 }
@@ -79,6 +83,7 @@ class SavedWallpaperConfig {
     required this.monthLabelColor,
     required this.width,
     required this.height,
+    this.screenTarget = 'lock',
   });
 
   final WallpaperData data;
@@ -87,4 +92,5 @@ class SavedWallpaperConfig {
   final int monthLabelColor;
   final double width;
   final double height;
+  final String screenTarget;
 }
