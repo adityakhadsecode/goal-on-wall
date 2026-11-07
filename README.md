@@ -129,6 +129,20 @@ lib/
 
 ## 📋 Changelog
 
+### v1.11.0-beta (2026-11-07)
+
+- ✨ **Real Year Layouts** — Days / Months / Quarters picker now actually changes the wallpaper; new Quarters renderer (Q1–Q4 headers with per-month dot rows). Layout is saved with the config and prefilled when editing.
+- ✨ **Custom Wallpaper Colors** — Curated color swatches for the today dot, caption/labels, and month labels in the Customize menu. Live preview, persisted, and the daily refresh renders them identically. Reset-to-theme included.
+- ✨ **Honest Home Card** — Hero card renders your active wallpaper's real painter (Dots or Flow); fallback clearly labelled "Year Progress" when nothing is set.
+- 🐛 **Theme Persistence** — Selected theme now survives app restarts.
+- 🐛 **Customization Toggles Work** — Caption / glow / percent toggles reach the actual wallpaper and the daily refresh, not just the preview.
+- 🐛 **Goal Calendar Uses Real Data** — Shows the active (or most recent) goal/launch/fitness calendar with a proper empty state; no more sample data.
+- 🐛 **Preview Button Previews** — Fullscreen render dialog instead of opening the share sheet.
+- 🐛 **Safe Deletes** — Deleting the calendar behind the active wallpaper stops the daily refresh from re-applying it; saved-list dedupe includes the style.
+- 🔧 **"New Wallpaper" Sheet** — Restructured into CALENDARS (Year / Life / Goal views) + CREATE; birthdate rejects future dates; leap-day-accurate age.
+- 🧹 **Design System Pass** — One accent rule, stated corner-radius scale (`AppRadius`), solid CTAs, simplified glass surfaces; `flutter analyze` clean, smoke test fixed.
+- 📦 **Version bump** — `1.11.0-beta+12`
+
 ### v1.10.0-beta (2026-03-08)
 
 - ✨ **"The Flow" Wallpaper Style** — Fully implemented winding river path painter with gradient stroke, milestone markers, shimmer particles, and today's glow dot.
