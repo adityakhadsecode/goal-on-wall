@@ -185,7 +185,7 @@ class _ThemeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      borderRadius: 24,
+      borderRadius: AppRadius.xl,
       padding: EdgeInsets.zero,
       child: Material(
         color: Colors.transparent,
@@ -200,13 +200,13 @@ class _ThemeCard extends StatelessWidget {
               children: [
                 // Preview area
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
                   child: Container(
                     height: 140,
                     width: double.infinity,
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.3),
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppRadius.lg),
                       border: Border.all(
                         color: Colors.white.withValues(alpha: 0.05),
                       ),

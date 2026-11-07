@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
+import '../theme/app_theme.dart';
 import '../screens/home_screen.dart';
 import '../screens/edit_screen.dart';
 import '../screens/life_calendar_screen.dart';
@@ -46,7 +47,7 @@ class _MainScaffoldState extends State<MainScaffold> {
       context: context,
       backgroundColor: palette.cardBackground,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
       ),
       builder: (ctx) {
         return Padding(
@@ -60,12 +61,12 @@ class _MainScaffoldState extends State<MainScaffold> {
                 height: 4,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
               const SizedBox(height: 24),
               Text(
-                'CREATE NEW',
+                'CALENDARS',
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
@@ -113,32 +114,27 @@ class _MainScaffoldState extends State<MainScaffold> {
                   );
                 },
               ),
-              const SizedBox(height: 12),
-              _buildAddOption(
-                icon: Icons.rocket_launch_rounded,
-                label: 'Product Launch',
-                subtitle: 'Countdown to your big launch day',
-                onTap: () {
-                  Navigator.pop(ctx);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => WallpaperTypeScreen(), // Navigate to type screen first or direct?
-                    ),
-                  );
-                },
+              const SizedBox(height: 20),
+              Text(
+                'CREATE',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 3,
+                  color: palette.textMuted,
+                ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 20),
               _buildAddOption(
-                icon: Icons.fitness_center_rounded,
-                label: 'Fitness Goal',
-                subtitle: 'Track your training journey',
+                icon: Icons.add_circle_outline_rounded,
+                label: 'New Wallpaper',
+                subtitle: 'Life, year, goal, launch or fitness',
                 onTap: () {
                   Navigator.pop(ctx);
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => WallpaperTypeScreen(),
+                      builder: (_) => const WallpaperTypeScreen(),
                     ),
                   );
                 },
@@ -262,7 +258,8 @@ class _MainScaffoldState extends State<MainScaffold> {
     return Container(
       decoration: BoxDecoration(
         color: palette.navBackground,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius:
+            const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
         border: Border(
           top: BorderSide(color: Colors.white.withValues(alpha: 0.05)),
         ),
@@ -274,7 +271,7 @@ class _MainScaffoldState extends State<MainScaffold> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildNavItem(0, Icons.home_rounded, 'Home'),
-              _buildNavItem(1, Icons.eco_rounded, 'Edit'),
+              _buildNavItem(1, Icons.edit_rounded, 'Edit'),
               _buildCenterButton(),
               _buildNavItem(3, Icons.grid_view_rounded, 'Life'),
               _buildNavItem(4, Icons.settings_rounded, 'Settings'),
@@ -302,7 +299,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                 Icon(
                   icon,
                   size: 26,
-                  color: isActive ? palette.accent : palette.textMuted,
+                  color: isActive ? palette.primaryLight : palette.textMuted,
                 ),
                 if (isActive)
                   Positioned(
@@ -312,11 +309,11 @@ class _MainScaffoldState extends State<MainScaffold> {
                       height: 4,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: palette.accent,
+                        color: palette.primaryLight,
                       ),
                     ),
                   ),
-              ],
+            ],
             ),
             const SizedBox(height: 6),
             Text(
@@ -326,7 +323,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1.5,
                 color: isActive
-                    ? palette.accent
+                    ? palette.primaryLight
                     : palette.textMuted,
               ),
             ),
@@ -346,16 +343,13 @@ class _MainScaffoldState extends State<MainScaffold> {
           width: 60,
           height: 60,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            color: Color.lerp(palette.cardBackground, palette.primary, 0.3),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.1),
-            ),
+            shape: BoxShape.circle,
+            color: palette.primary,
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.5),
-                blurRadius: 30,
-                offset: const Offset(0, 8),
+                color: Colors.black.withValues(alpha: 0.3),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
+/// Elevated dark surface card: solid translucent fill + hairline border.
 class GlassCard extends StatelessWidget {
   final Widget child;
   final double borderRadius;
@@ -9,7 +11,7 @@ class GlassCard extends StatelessWidget {
   const GlassCard({
     super.key,
     required this.child,
-    this.borderRadius = 40,
+    this.borderRadius = AppRadius.xl,
     this.padding,
     this.blurAmount = 10,
   });
@@ -20,26 +22,11 @@ class GlassCard extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(borderRadius),
-        // Simulated frosted-glass look without BackdropFilter
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.white.withValues(alpha: 0.07),
-            Colors.white.withValues(alpha: 0.03),
-          ],
-        ),
+        color: Colors.white.withValues(alpha: 0.05),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.08),
           width: 1,
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: child,
     );

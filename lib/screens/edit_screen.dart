@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
 import '../providers/wallpaper_provider.dart';
+import '../services/wallpaper_storage.dart';
 import '../models/wallpaper_config.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
+import '../theme/app_theme.dart';
 import 'life_customize_screen.dart';
 import 'year_customize_screen.dart';
 import 'goal_customize_screen.dart';
@@ -114,17 +116,17 @@ class _EditScreenState extends State<EditScreen> {
       builder: (ctx) {
         final palette = context.read<ThemeProvider>().palette;
         return AlertDialog(
-          backgroundColor: const Color(0xFF1A1A1A),
+          backgroundColor: palette.cardBackground,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             side: BorderSide(
               color: Colors.white.withValues(alpha: 0.08),
             ),
           ),
           title: Text(
             'Delete $count calendar${count > 1 ? 's' : ''}?',
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: palette.textPrimary,
               fontWeight: FontWeight.w600,
               fontSize: 18,
             ),
@@ -132,7 +134,7 @@ class _EditScreenState extends State<EditScreen> {
           content: Text(
             'This will remove the selected calendars from your list. This action cannot be undone.',
             style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.6),
+              color: palette.textSecondary,
               fontSize: 13,
             ),
           ),
@@ -151,7 +153,7 @@ class _EditScreenState extends State<EditScreen> {
               style: TextButton.styleFrom(
                 backgroundColor: Colors.red.withValues(alpha: 0.15),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
                 ),
               ),
               onPressed: () => Navigator.pop(ctx, true),
@@ -169,11 +171,33 @@ class _EditScreenState extends State<EditScreen> {
     );
 
     if (confirmed == true) {
+      // Snapshot the active config so we can tell if it's being deleted
+      final activeConfig = await WallpaperStorage.load();
+      final active = activeConfig?.data;
+
       // Remove in reverse order to keep indices valid
       final sorted = _selectedIndices.toList()..sort((a, b) => b.compareTo(a));
+      final removed = <WallpaperData>[];
       for (final idx in sorted) {
+        if (idx < provider.savedWallpapers.length) {
+          removed.add(provider.savedWallpapers[idx]);
+        }
         await provider.removeWallpaper(idx);
       }
+
+      // If the deleted wallpaper backs the active one, clear the stored
+      // config so the daily refresh stops re-applying it.
+      if (active != null &&
+          removed.any((w) =>
+              w.calendarType == active.calendarType &&
+              w.wallpaperTheme == active.wallpaperTheme &&
+              w.label == active.label &&
+              w.startDate == active.startDate &&
+              w.endDate == active.endDate)) {
+        await WallpaperStorage.clear();
+        await provider.setActiveWallpaper(null);
+      }
+
       _exitSelectionMode();
     }
   }
@@ -449,7 +473,7 @@ class _EditScreenState extends State<EditScreen> {
                     return Container(
                       height: 56,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(18),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
                         color: Colors.red.withValues(alpha: 0.15),
                         border: Border.all(
                           color: Colors.redAccent.withValues(alpha: 0.3),
@@ -465,7 +489,7 @@ class _EditScreenState extends State<EditScreen> {
                       child: Material(
                         color: Colors.transparent,
                         child: InkWell(
-                          borderRadius: BorderRadius.circular(18),
+                          borderRadius: BorderRadius.circular(AppRadius.lg),
                           onTap: () => _deleteSelected(provider),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -510,11 +534,11 @@ class _EditScreenState extends State<EditScreen> {
     required VoidCallback onLongPress,
   }) {
     return GlassCard(
-      borderRadius: 20,
+      borderRadius: AppRadius.lg,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           onTap: onTap,
           onLongPress: onLongPress,
           child: Padding(
@@ -550,7 +574,7 @@ class _EditScreenState extends State<EditScreen> {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(AppRadius.md),
                     color: palette.primary.withValues(alpha: 0.2),
                   ),
                   child: Icon(icon, color: palette.primaryLight, size: 24),
@@ -578,7 +602,7 @@ class _EditScreenState extends State<EditScreen> {
                       ),
                       const SizedBox(height: 10),
                       ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
+                        borderRadius: BorderRadius.circular(999),
                         child: LinearProgressIndicator(
                           value: progress,
                           backgroundColor:

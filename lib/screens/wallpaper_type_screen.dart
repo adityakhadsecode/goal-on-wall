@@ -129,12 +129,12 @@ class _TypeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      borderRadius: 20,
+      borderRadius: AppRadius.lg,
       padding: EdgeInsets.zero,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -151,15 +151,8 @@ class _TypeCard extends StatelessWidget {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        palette.primary.withValues(alpha: 0.3),
-                        palette.primaryLight.withValues(alpha: 0.15),
-                      ],
-                    ),
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    color: palette.primary.withValues(alpha: 0.2),
                     border: Border.all(
                       color: palette.primaryLight.withValues(alpha: 0.15),
                     ),

@@ -25,31 +25,6 @@ class OrganicBackground extends StatelessWidget {
       ),
       child: Stack(
         children: [
-          // Decorative blur circles
-          Positioned(
-            top: MediaQuery.of(context).size.height * 0.1,
-            left: -MediaQuery.of(context).size.width * 0.2,
-            child: Container(
-              width: 400,
-              height: 400,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: palette.primary.withValues(alpha: 0.1),
-              ),
-            ),
-          ),
-          Positioned(
-            bottom: MediaQuery.of(context).size.height * 0.2,
-            right: -MediaQuery.of(context).size.width * 0.2,
-            child: Container(
-              width: 320,
-              height: 320,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: palette.accent.withValues(alpha: 0.05),
-              ),
-            ),
-          ),
           child,
         ],
       ),

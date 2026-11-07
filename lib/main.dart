@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:workmanager/workmanager.dart';
 import 'theme/theme_provider.dart';
 import 'widgets/main_scaffold.dart';
@@ -26,16 +27,19 @@ void main() async {
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   // Register daily wallpaper refresh with WorkManager only if enabled
-  await Workmanager().initialize(callbackDispatcher);
-  final autoSet = await UserPrefs.getAutoSetWallpaper();
-  if (autoSet) {
-    await Workmanager().registerPeriodicTask(
-      'daily-wallpaper-refresh',
-      refreshWallpaperTask,
-      frequency: const Duration(hours: 24),
-      constraints: Constraints(networkType: NetworkType.notRequired),
-      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-    );
+  // (Workmanager is Android/iOS-only; skip on web builds.)
+  if (!kIsWeb) {
+    await Workmanager().initialize(callbackDispatcher);
+    final autoSet = await UserPrefs.getAutoSetWallpaper();
+    if (autoSet) {
+      await Workmanager().registerPeriodicTask(
+        'daily-wallpaper-refresh',
+        refreshWallpaperTask,
+        frequency: const Duration(hours: 24),
+        constraints: Constraints(networkType: NetworkType.notRequired),
+        existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+      );
+    }
   }
 
   runApp(const GoalOnWallApp());

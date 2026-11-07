@@ -39,7 +39,7 @@ class WallpaperProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> setActiveWallpaper(WallpaperData data) async {
+  Future<void> setActiveWallpaper(WallpaperData? data) async {
     _activeWallpaper = data;
     notifyListeners();
   }
@@ -51,14 +51,15 @@ class WallpaperProvider extends ChangeNotifier {
   }
 
   Future<void> addWallpaper(WallpaperData data) async {
-    // Avoid duplicates if same data is added (simplified check)
-    final exists = _savedWallpapers.any((w) => 
-      w.calendarType == data.calendarType && 
+    // Avoid duplicates: same type, label, dates AND style
+    final exists = _savedWallpapers.any((w) =>
+      w.calendarType == data.calendarType &&
+      w.wallpaperTheme == data.wallpaperTheme &&
       w.label == data.label &&
       w.startDate == data.startDate &&
       w.endDate == data.endDate
     );
-    
+
     if (!exists) {
       _savedWallpapers.insert(0, data); // Newest first
       notifyListeners();

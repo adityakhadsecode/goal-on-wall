@@ -205,7 +205,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                   GlassCard(
-                    borderRadius: 20,
+                    borderRadius: AppRadius.lg,
                     padding: const EdgeInsets.all(4),
                     child: Column(
                       children: [
@@ -234,7 +234,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                   GlassCard(
-                    borderRadius: 20,
+                    borderRadius: AppRadius.lg,
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: AppThemes.allThemes.map((theme) {
@@ -263,7 +263,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                   GlassCard(
-                    borderRadius: 20,
+                    borderRadius: AppRadius.lg,
                     padding: const EdgeInsets.all(4),
                     child: Column(
                       children: [
@@ -274,16 +274,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _autoSetWallpaper,
                           palette,
                           _toggleAutoSetWallpaper,
-                        ),
-                        Divider(
-                          color: Colors.white.withValues(alpha: 0.05),
-                          height: 1,
-                        ),
-                        _buildSettingsItem(
-                          'Wallpaper Style',
-                          'Dot grid with progress',
-                          Icons.style_rounded,
-                          palette,
                         ),
                       ],
                     ),
@@ -303,7 +293,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                   GlassCard(
-                    borderRadius: 20,
+                    borderRadius: AppRadius.lg,
                     padding: const EdgeInsets.all(4),
                     child: Column(
                       children: [
@@ -332,7 +322,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   const SizedBox(height: 12),
                   GlassCard(
-                    borderRadius: 20,
+                    borderRadius: AppRadius.lg,
                     padding: const EdgeInsets.all(4),
                     child: Column(
                       children: [
@@ -378,7 +368,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
           child: Row(
@@ -394,7 +384,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     end: Alignment.bottomRight,
                   ),
                   border: isSelected
-                      ? Border.all(color: theme.accent, width: 2)
+                      ? Border.all(color: theme.primaryLight, width: 2)
                       : null,
                 ),
                 child: isSelected
@@ -432,7 +422,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(AppRadius.sm),
                     color: theme.primaryLight.withValues(alpha: 0.15),
                   ),
                   child: Text(
@@ -727,10 +717,18 @@ class _BirthDateSheet extends StatefulWidget {
 class _BirthDateSheetState extends State<_BirthDateSheet> {
   bool _saving = false;
 
-  bool get _isComplete =>
-      widget.dayCtrl.text.length == 2 &&
-      widget.monthCtrl.text.length == 2 &&
-      widget.yearCtrl.text.length == 4;
+  bool get _isComplete {
+    if (widget.dayCtrl.text.length != 2 ||
+        widget.monthCtrl.text.length != 2 ||
+        widget.yearCtrl.text.length != 4) {
+      return false;
+    }
+    // Reject future dates
+    final date = DateTime(int.parse(widget.yearCtrl.text),
+        int.parse(widget.monthCtrl.text), int.parse(widget.dayCtrl.text));
+    final today = DateTime.now();
+    return !date.isAfter(DateTime(today.year, today.month, today.day));
+  }
 
   int get _maxDay {
     final y = int.tryParse(widget.yearCtrl.text) ?? DateTime.now().year;
@@ -756,7 +754,7 @@ class _BirthDateSheetState extends State<_BirthDateSheet> {
     return Container(
       decoration: BoxDecoration(
         color: p.cardBackground,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
@@ -770,7 +768,7 @@ class _BirthDateSheetState extends State<_BirthDateSheet> {
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(999),
             ),
           ),
 
@@ -1007,7 +1005,7 @@ class _NameSheetState extends State<_NameSheet> {
     return Container(
       decoration: BoxDecoration(
         color: p.cardBackground,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.xl)),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
@@ -1021,7 +1019,7 @@ class _NameSheetState extends State<_NameSheet> {
             margin: const EdgeInsets.only(bottom: 20),
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(2),
+              borderRadius: BorderRadius.circular(999),
             ),
           ),
 
@@ -1063,17 +1061,17 @@ class _NameSheetState extends State<_NameSheet> {
               filled: true,
               fillColor: Colors.white.withValues(alpha: 0.05),
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 borderSide: BorderSide(
                     color: Colors.white.withValues(alpha: 0.1), width: 1),
               ),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 borderSide: BorderSide(
                     color: Colors.white.withValues(alpha: 0.1), width: 1),
               ),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(AppRadius.md),
                 borderSide: BorderSide(color: p.primaryLight, width: 1.5),
               ),
               contentPadding:

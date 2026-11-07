@@ -1,6 +1,27 @@
 import 'package:flutter/material.dart';
 
+/// Stated corner-radius scale — the only radii allowed in app chrome.
+///
+/// sm 8 = small chips/tags · md 12 = inputs & icon tiles ·
+/// lg 16 = buttons & standard cards · xl 24 = hero cards, sheets, dialogs,
+/// bottom nav. Badges/pills/progress bars are full pills (StadiumBorder /
+/// circular(999)). Device-frame mock parts are exempt (hardware depiction).
+class AppRadius {
+  static const double sm = 8;
+  static const double md = 12;
+  static const double lg = 16;
+  static const double xl = 24;
+}
+
 /// Defines a custom color palette for the app themes.
+///
+/// Color roles:
+/// - [primaryLight] — THE interactive accent. CTAs, active tabs, selection
+///   borders, progress, section labels. One accent, locked.
+/// - [primary] — dark tone of the same hue for solid button fills and
+///   icon-tile tints.
+/// - [accent] — "today" marker inside calendar art (dot grids, rings,
+///   painters) only. Never for chrome text, buttons, or tab states.
 class AppColorPalette {
   final String name;
   final Color deepBackground;

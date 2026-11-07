@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import 'wallpaper_type_screen.dart';
@@ -15,6 +17,7 @@ import 'product_launch_customize_screen.dart';
 import 'fitness_goal_customize_screen.dart';
 import 'analytics_screen.dart';
 import '../providers/wallpaper_provider.dart';
+import '../painters/dot_wallpaper_painter.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -27,16 +30,17 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late AnimationController _floatingController;
   late AnimationController _riverController;
   late AnimationController _insightFadeController;
+  Timer? _insightTimer;
   int _insightIndex = 0;
   String _userName = 'there';
 
   static const List<String> _insights = [
-    '✦  Every day is a brushstroke on your canvas.',
-    '✦  Small steps today, towering peaks tomorrow.',
-    '✦  You are further than you were yesterday.',
-    '✦  Growth is quiet — but relentless.',
-    '✦  The river never stops. Neither do you.',
-    '✦  Let today add another ring to your tree.',
+    'Every day is a brushstroke on your canvas.',
+    'Small steps today, towering peaks tomorrow.',
+    'You are further than you were yesterday.',
+    'Growth is quiet — but relentless.',
+    'The river never stops. Neither do you.',
+    'Let today add another ring to your tree.',
   ];
 
   @override
@@ -69,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   void _scheduleInsightCycle() {
-    Future.delayed(const Duration(seconds: 5), () {
+    _insightTimer = Timer(const Duration(seconds: 5), () {
       if (!mounted) return;
       _insightFadeController.reverse().then((_) {
         if (!mounted) return;
@@ -84,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _insightTimer?.cancel();
     _floatingController.dispose();
     _riverController.dispose();
     _insightFadeController.dispose();
@@ -111,17 +116,6 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final endOfYear = DateTime(now.year, 12, 31);
     return endOfYear.difference(now).inDays;
   }
-
-  // ── Week progress (Mon=1 … Sun=7) ─────────────────────────
-  double get _weekProgress => DateTime.now().weekday / 7.0;
-
-  // ── Day progress ──────────────────────────────────────────
-  double get _dayProgress {
-    final now = DateTime.now();
-    return (now.hour * 60 + now.minute) / (24 * 60);
-  }
-
-  String _pct(double v) => '${(v * 100).round()}%';
 
   @override
   Widget build(BuildContext context) {
@@ -165,6 +159,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 RepaintBoundary(
                   child: _WallpaperPreviewCard(
                     palette: palette,
+                    activeWp: activeWp,
                     yearProgress: progressFactor,
                     yearPct: progressPct,
                     daysPassed: elapsedDaysValue,
@@ -184,6 +179,9 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 // ── MY GOAL PROGRESS ──────────────────────────
                 _MyGoalProgress(
                   palette: palette,
+                  progressTitle: activeWp != null
+                      ? 'MY GOAL PROGRESS'
+                      : 'YEAR PROGRESS',
                   progressPct: progressPct,
                   progressFactor: progressFactor,
                   daysPassed: elapsedDaysValue,
@@ -229,7 +227,7 @@ class _GreetingHeader extends StatelessWidget {
             );
           },
           child: Text(
-            'Hii $userName 👋',
+            'Hi $userName',
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.w700,
@@ -260,6 +258,7 @@ class _GreetingHeader extends StatelessWidget {
 class _WallpaperPreviewCard extends StatelessWidget {
   const _WallpaperPreviewCard({
     required this.palette,
+    required this.activeWp,
     required this.yearProgress,
     required this.yearPct,
     required this.daysPassed,
@@ -269,6 +268,7 @@ class _WallpaperPreviewCard extends StatelessWidget {
   });
 
   final dynamic palette;
+  final WallpaperData? activeWp;
   final double yearProgress;
   final int yearPct;
   final int daysPassed;
@@ -278,27 +278,47 @@ class _WallpaperPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasActive = activeWp != null;
+
     return GlassCard(
-      borderRadius: 40,
+      borderRadius: AppRadius.xl,
       blurAmount: 14,
       child: SizedBox(
         height: cardHeight,
         child: Stack(
           children: [
-            // River flow background painter
+            // Wallpaper painter — the actual style of the active wallpaper
             Positioned.fill(
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(40),
-                child: AnimatedBuilder(
-                  animation: riverController,
-                  builder: (context, child) => CustomPaint(
-                    painter: RiverFlowPainter(
-                      progress: yearProgress,
-                      animValue: riverController.value,
-                      palette: palette,
-                    ),
-                  ),
-                ),
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                child: hasActive &&
+                        activeWp!.wallpaperTheme == WallpaperTheme.dots
+                    ? CustomPaint(
+                        painter: DotWallpaperPainter(
+                          data: activeWp!,
+                          pastColor: Colors.white,
+                          todayColor: palette.accent as Color,
+                          futureColor: Colors.white.withValues(alpha: 0.12),
+                          bgColor: const Color(0xFF0D0D0D),
+                          labelColor: palette.primaryLight as Color,
+                          monthLabelColor: palette.textMuted as Color,
+                          // Stats overlay replaces the caption on the card
+                          showCaption: false,
+                          showTodayGlow: true,
+                          showPercent: false,
+                        ),
+                        child: const SizedBox.expand(),
+                      )
+                    : AnimatedBuilder(
+                        animation: riverController,
+                        builder: (context, child) => CustomPaint(
+                          painter: RiverFlowPainter(
+                            progress: yearProgress,
+                            animValue: riverController.value,
+                            palette: palette,
+                          ),
+                        ),
+                      ),
               ),
             ),
 
@@ -311,7 +331,7 @@ class _WallpaperPreviewCard extends StatelessWidget {
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.45),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(999),
                   border: Border.all(
                     color: (palette.primaryLight as Color)
                         .withValues(alpha: 0.25),
@@ -344,7 +364,7 @@ class _WallpaperPreviewCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 7),
                     Text(
-                      'ACTIVE WALLPAPER',
+                      activeWp != null ? 'ACTIVE WALLPAPER' : 'YEAR PROGRESS',
                       style: TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.w700,
@@ -398,9 +418,9 @@ class _WallpaperPreviewCard extends StatelessWidget {
                             horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
                           color: Colors.black.withValues(alpha: 0.35),
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius: BorderRadius.circular(999),
                           border: Border.all(
-                            color: (palette.accent as Color)
+                            color: (palette.primaryLight as Color)
                                 .withValues(alpha: 0.25),
                           ),
                         ),
@@ -411,7 +431,7 @@ class _WallpaperPreviewCard extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.w600,
-                                color: palette.accent as Color,
+                                color: palette.primaryLight as Color,
                                 height: 1,
                               ),
                             ),
@@ -436,7 +456,7 @@ class _WallpaperPreviewCard extends StatelessWidget {
 
                   // Thin progress line
                   ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(999),
                     child: Container(
                       height: 3,
                       decoration: BoxDecoration(
@@ -450,14 +470,7 @@ class _WallpaperPreviewCard extends StatelessWidget {
                             gradient: LinearGradient(
                               colors: palette.vineGradient as List<Color>,
                             ),
-                            borderRadius: BorderRadius.circular(4),
-                            boxShadow: [
-                              BoxShadow(
-                                color: (palette.primaryLight as Color)
-                                    .withValues(alpha: 0.6),
-                                blurRadius: 6,
-                              ),
-                            ],
+                            borderRadius: BorderRadius.circular(999),
                           ),
                         ),
                       ),
@@ -486,7 +499,7 @@ class _ActionButtons extends StatelessWidget {
     return Column(
       children: [
         _GradientButton(
-          label: 'Create New Wallpaper',
+          label: 'New Wallpaper',
           icon: Icons.add_circle_outline_rounded,
           palette: palette,
           onTap: () => Navigator.push(
@@ -590,35 +603,13 @@ class _GradientButton extends StatelessWidget {
       height: 56,
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(18),
-        gradient: LinearGradient(
-          colors: [
-            palette.primary as Color,
-            palette.primaryLight as Color,
-            palette.accent as Color,
-          ],
-          stops: const [0.0, 0.6, 1.0],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: (palette.primaryLight as Color).withValues(alpha: 0.30),
-            blurRadius: 24,
-            offset: const Offset(0, 6),
-          ),
-          BoxShadow(
-            color: (palette.accent as Color).withValues(alpha: 0.15),
-            blurRadius: 40,
-            offset: const Offset(0, 10),
-          ),
-        ],
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.15),
-        ),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        color: palette.primary as Color,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           onTap: onTap,
           splashColor: Colors.white.withValues(alpha: 0.08),
           child: Row(
@@ -662,7 +653,7 @@ class _GlassButton extends StatelessWidget {
       height: 52,
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         color: Colors.white.withValues(alpha: 0.04),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.08),
@@ -671,7 +662,7 @@ class _GlassButton extends StatelessWidget {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           onTap: onTap,
           splashColor: (palette.primary as Color).withValues(alpha: 0.08),
           child: Row(
@@ -702,6 +693,7 @@ class _GlassButton extends StatelessWidget {
 class _MyGoalProgress extends StatelessWidget {
   const _MyGoalProgress({
     required this.palette,
+    required this.progressTitle,
     required this.progressPct,
     required this.progressFactor,
     required this.daysPassed,
@@ -711,6 +703,7 @@ class _MyGoalProgress extends StatelessWidget {
   });
 
   final dynamic palette;
+  final String progressTitle;
   final int progressPct;
   final double progressFactor;
   final int daysPassed;
@@ -721,7 +714,7 @@ class _MyGoalProgress extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      borderRadius: 28,
+      borderRadius: AppRadius.xl,
       blurAmount: 12,
       padding: const EdgeInsets.fromLTRB(22, 18, 22, 20),
       child: Column(
@@ -737,7 +730,7 @@ class _MyGoalProgress extends StatelessWidget {
               ),
               const SizedBox(width: 7),
               Text(
-                'MY GOAL PROGRESS',
+                progressTitle,
                 style: TextStyle(
                   fontSize: 9,
                   fontWeight: FontWeight.w700,
@@ -769,7 +762,7 @@ class _MyGoalProgress extends StatelessWidget {
                   label: 'PASSED',
                   value: '$daysPassed',
                   progress: 1.0, // Fixed full since it's just a count
-                  accent: palette.accent as Color,
+                  accent: palette.primaryLight as Color,
                   palette: palette,
                 ),
               ),
@@ -788,15 +781,7 @@ class _MyGoalProgress extends StatelessWidget {
           // Horizontal divider
           Container(
             height: 1,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  Colors.transparent,
-                  Colors.white.withValues(alpha: 0.07),
-                  Colors.transparent,
-                ],
-              ),
-            ),
+            color: Colors.white.withValues(alpha: 0.07),
           ),
 
           const SizedBox(height: 14),
@@ -827,17 +812,7 @@ class _SnapDivider extends StatelessWidget {
     return Container(
       width: 1,
       height: 50,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Colors.transparent,
-            Color(0x11FFFFFF),
-            Colors.transparent,
-          ],
-        ),
-      ),
+      color: Colors.white.withValues(alpha: 0.07),
     );
   }
 }
@@ -885,7 +860,7 @@ class _SnapshotStat extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ClipRRect(
-            borderRadius: BorderRadius.circular(3),
+            borderRadius: BorderRadius.circular(999),
             child: Container(
               height: 3,
               decoration: BoxDecoration(
@@ -897,7 +872,7 @@ class _SnapshotStat extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                     color: accent,
-                    borderRadius: BorderRadius.circular(3),
+                    borderRadius: BorderRadius.circular(999),
                   ),
                 ),
               ),

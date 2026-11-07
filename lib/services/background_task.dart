@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:workmanager/workmanager.dart';
 
+import 'user_prefs.dart';
 import 'wallpaper_service.dart';
 import 'wallpaper_storage.dart';
 
@@ -19,6 +20,11 @@ void callbackDispatcher() {
         final saved = await WallpaperStorage.load();
         if (saved == null) return true; // No config stored, nothing to do.
 
+        // Respect the customization toggles the user set in the preview
+        final showCaption = await UserPrefs.getShowCaption();
+        final showTodayGlow = await UserPrefs.getShowTodayGlow();
+        final showPercent = await UserPrefs.getShowPercent();
+
         final pngBytes = await WallpaperService.renderToPng(
           data: saved.data,
           pastColor: Colors.white,
@@ -28,6 +34,9 @@ void callbackDispatcher() {
           monthLabelColor: Color(saved.monthLabelColor),
           width: saved.width,
           height: saved.height,
+          showCaption: showCaption,
+          showTodayGlow: showTodayGlow,
+          showPercent: showPercent,
         );
 
         // Apply to the correct screen(s) based on user's last choice

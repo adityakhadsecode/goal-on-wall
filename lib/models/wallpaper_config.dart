@@ -3,6 +3,10 @@ enum CalendarType { life, year, goal, productLaunch, fitnessGoal }
 
 enum WallpaperTheme { flow, dots }
 
+/// Dot arrangement for Year Calendar wallpapers (only meaningful for the
+/// "Dots" style — The Flow is a single path and ignores it).
+enum YearLayoutStyle { days, months, quarters }
+
 /// All the information needed to render any wallpaper type.
 class WallpaperData {
   const WallpaperData({
@@ -11,10 +15,14 @@ class WallpaperData {
     required this.startDate,
     required this.endDate,
     this.label,
+    this.yearLayout = YearLayoutStyle.months,
   });
 
   final CalendarType calendarType;
   final WallpaperTheme wallpaperTheme;
+
+  /// Dot layout for year calendars (ignored by other types).
+  final YearLayoutStyle yearLayout;
 
   /// First day of the period (inclusive).
   final DateTime startDate;
@@ -63,9 +71,11 @@ class WallpaperData {
 
   /// Formatted text summary for sharing.
   String get shareText {
-    final goalLabel = label ?? 'My Goal';
+    final subject = calendarType == CalendarType.year
+        ? 'Year: ${label ?? startDate.year}'
+        : 'Goal: ${label ?? 'My Goal'}';
     return 'Check out my progress! ✨\n\n'
-        'Goal: $goalLabel\n'
+        '$subject\n'
         'Status: $elapsedDays of $totalDays days passed\n'
         'Remaining: $daysLeft days ($percentElapsed% done)\n\n'
         'Sent via Goal on Wall 🎯';
@@ -78,7 +88,10 @@ class WallpaperData {
   // ── Factory helpers for types that don't need custom dates ───
 
   /// Year Calendar: always Jan 1 → Dec 31 of the current year.
-  factory WallpaperData.yearCalendar({WallpaperTheme wallpaperTheme = WallpaperTheme.dots}) {
+  factory WallpaperData.yearCalendar({
+    WallpaperTheme wallpaperTheme = WallpaperTheme.dots,
+    YearLayoutStyle yearLayout = YearLayoutStyle.months,
+  }) {
     final now = DateTime.now();
     return WallpaperData(
       calendarType: CalendarType.year,
@@ -86,6 +99,7 @@ class WallpaperData {
       startDate: DateTime(now.year, 1, 1),
       endDate: DateTime(now.year, 12, 31),
       label: '${now.year}',
+      yearLayout: yearLayout,
     );
   }
 
@@ -96,6 +110,7 @@ class WallpaperData {
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
       'label': label,
+      'yearLayout': yearLayout.index,
     };
   }
 
@@ -106,6 +121,10 @@ class WallpaperData {
       startDate: DateTime.parse(json['startDate'] as String),
       endDate: DateTime.parse(json['endDate'] as String),
       label: json['label'] as String?,
+      // Older saved configs predate the layout field.
+      yearLayout: json['yearLayout'] != null
+          ? YearLayoutStyle.values[json['yearLayout'] as int]
+          : YearLayoutStyle.months,
     );
   }
 }

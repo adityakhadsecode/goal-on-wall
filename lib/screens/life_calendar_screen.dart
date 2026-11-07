@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import '../services/user_prefs.dart';
@@ -92,7 +93,10 @@ class _LifeCalendarScreenState extends State<LifeCalendarScreen> {
     final birthDate = _birthDate ?? DateTime(2000, 1, 1);
     final ageInWeeks = now.difference(birthDate).inDays ~/ 7;
     final totalWeeks = _lifeExpectancy * 52;
-    final ageInYears = now.difference(birthDate).inDays ~/ 365;
+    // Exact age in years (leap-day aware)
+    final hadBirthdayThisYear = now.month > birthDate.month ||
+        (now.month == birthDate.month && now.day >= birthDate.day);
+    final ageInYears = now.year - birthDate.year - (hadBirthdayThisYear ? 0 : 1);
     final daysLived = now.difference(birthDate).inDays;
 
     if (!_loaded) {
@@ -165,7 +169,7 @@ class _LifeCalendarScreenState extends State<LifeCalendarScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: GlassCard(
-                borderRadius: 20,
+                borderRadius: AppRadius.lg,
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -195,7 +199,7 @@ class _LifeCalendarScreenState extends State<LifeCalendarScreen> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: GlassCard(
-                  borderRadius: 24,
+                  borderRadius: AppRadius.xl,
                   padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

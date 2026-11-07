@@ -73,6 +73,23 @@ class WallpaperStorage {
       screenTarget: prefs.getString(_keyScreenTarget) ?? 'lock',
     );
   }
+
+  /// Removes the stored active-wallpaper config (e.g. when the user deletes
+  /// the calendar that backs it), so the daily refresh stops re-applying it.
+  static Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_keyCalendarType);
+    await prefs.remove(_keyWallpaperTheme);
+    await prefs.remove(_keyStartDate);
+    await prefs.remove(_keyEndDate);
+    await prefs.remove(_keyLabel);
+    await prefs.remove(_keyTodayColor);
+    await prefs.remove(_keyLabelColor);
+    await prefs.remove(_keyMonthLabelColor);
+    await prefs.remove(_keyWidth);
+    await prefs.remove(_keyHeight);
+    await prefs.remove(_keyScreenTarget);
+  }
 }
 
 class SavedWallpaperConfig {

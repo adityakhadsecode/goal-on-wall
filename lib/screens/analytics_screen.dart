@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/wallpaper_config.dart';
 import '../theme/theme_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 
@@ -14,7 +15,6 @@ class AnalyticsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.watch<ThemeProvider>().palette;
-    final theme = Theme.of(context);
 
     return OrganicBackground(
       child: Scaffold(
@@ -89,7 +89,7 @@ class _AnalyticsHeader extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: (palette.primaryLight as Color).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
                 border: Border.all(color: (palette.primaryLight as Color).withValues(alpha: 0.2)),
               ),
               child: Text(
@@ -106,7 +106,7 @@ class _AnalyticsHeader extends StatelessWidget {
         ),
         const SizedBox(height: 12),
         Text(
-          data.label ?? 'Untiteld Goal',
+          data.label ?? 'Untitled Goal',
           style: TextStyle(
             fontSize: 32,
             fontWeight: FontWeight.w700,
@@ -140,7 +140,7 @@ class _ProgressCard extends StatelessWidget {
     final progress = data.percentElapsed / 100.0;
     
     return GlassCard(
-      borderRadius: 32,
+      borderRadius: AppRadius.xl,
       padding: const EdgeInsets.all(28),
       child: Column(
         children: [
@@ -155,7 +155,7 @@ class _ProgressCard extends StatelessWidget {
                   strokeWidth: 14,
                   strokeCap: StrokeCap.round,
                   backgroundColor: Colors.white.withValues(alpha: 0.05),
-                  color: palette.accent,
+                  color: palette.primaryLight,
                 ),
               ),
               Column(
@@ -258,7 +258,7 @@ class _MetricTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GlassCard(
-      borderRadius: 20,
+      borderRadius: AppRadius.lg,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -305,7 +305,7 @@ class _TimelineCard extends StatelessWidget {
     final dateFormat = DateFormat('MMM dd, yyyy');
 
     return GlassCard(
-      borderRadius: 24,
+      borderRadius: AppRadius.xl,
       padding: const EdgeInsets.all(22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

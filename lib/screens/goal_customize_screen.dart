@@ -219,7 +219,7 @@ class _GoalCustomizeScreenState extends State<GoalCustomizeScreen> {
 
                 // ── Goal name ─────────────────────────────────
                 GlassCard(
-                  borderRadius: 24,
+                  borderRadius: AppRadius.xl,
                   padding: const EdgeInsets.all(22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -255,7 +255,7 @@ class _GoalCustomizeScreenState extends State<GoalCustomizeScreen> {
 
                 // ── Start date ────────────────────────────────
                 GlassCard(
-                  borderRadius: 24,
+                  borderRadius: AppRadius.xl,
                   padding: const EdgeInsets.all(22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -315,7 +315,7 @@ class _GoalCustomizeScreenState extends State<GoalCustomizeScreen> {
 
                 // ── Deadline ──────────────────────────────────
                 GlassCard(
-                  borderRadius: 24,
+                  borderRadius: AppRadius.xl,
                   padding: const EdgeInsets.all(22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -440,7 +440,7 @@ class _GoalTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         color: Colors.white.withValues(alpha: 0.05),
         border: Border.all(
           color: Colors.white.withValues(alpha: 0.08),

@@ -225,7 +225,7 @@ class _FitnessGoalCustomizeScreenState
 
                 // ── Fitness goal ───────────────────────────────
                 GlassCard(
-                  borderRadius: 24,
+                  borderRadius: AppRadius.xl,
                   padding: const EdgeInsets.all(22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -273,7 +273,7 @@ class _FitnessGoalCustomizeScreenState
 
                 // ── Training start date ───────────────────────
                 GlassCard(
-                  borderRadius: 24,
+                  borderRadius: AppRadius.xl,
                   padding: const EdgeInsets.all(22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -333,7 +333,7 @@ class _FitnessGoalCustomizeScreenState
 
                 // ── Event / race date ─────────────────────────
                 GlassCard(
-                  borderRadius: 24,
+                  borderRadius: AppRadius.xl,
                   padding: const EdgeInsets.all(22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -457,7 +457,7 @@ class _FitnessTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         color: Colors.white.withValues(alpha: 0.05),
         border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
       ),

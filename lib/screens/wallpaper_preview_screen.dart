@@ -4,12 +4,14 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import '../theme/theme_provider.dart';
+import '../theme/app_theme.dart';
 import '../models/wallpaper_config.dart';
 import '../providers/wallpaper_provider.dart';
 import '../painters/dot_wallpaper_painter.dart';
 import '../painters/flow_wallpaper_painter.dart';
 import '../services/wallpaper_service.dart';
 import '../services/wallpaper_storage.dart';
+import '../services/user_prefs.dart';
 
 class WallpaperPreviewScreen extends StatefulWidget {
   const WallpaperPreviewScreen({super.key, required this.data});
@@ -25,10 +27,45 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
   bool _isSharing = false;
   bool _isSettingBoth = false;
 
-  // Customization toggles
+  // Customization toggles (persisted so the daily refresh renders the same)
   bool _showCaption = true;
   bool _showTodayGlow = true;
   bool _showPercent = true;
+
+  // Wallpaper color overrides (null = follow the app theme)
+  Color? _todayColor;
+  Color? _labelColor;
+  Color? _monthLabelColor;
+
+  Color _effectiveToday(Color themeAccent) => _todayColor ?? themeAccent;
+  Color _effectiveLabel(Color themeLabel) => _labelColor ?? themeLabel;
+  Color _effectiveMonthLabel(Color themeMonth) =>
+      _monthLabelColor ?? themeMonth;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCustomization();
+  }
+
+  Future<void> _loadCustomization() async {
+    final caption = await UserPrefs.getShowCaption();
+    final glow = await UserPrefs.getShowTodayGlow();
+    final percent = await UserPrefs.getShowPercent();
+    final today = await UserPrefs.getWallpaperTodayColor();
+    final label = await UserPrefs.getWallpaperLabelColor();
+    final month = await UserPrefs.getWallpaperMonthLabelColor();
+    if (mounted) {
+      setState(() {
+        _showCaption = caption;
+        _showTodayGlow = glow;
+        _showPercent = percent;
+        _todayColor = today != null ? Color(today) : null;
+        _labelColor = label != null ? Color(label) : null;
+        _monthLabelColor = month != null ? Color(month) : null;
+      });
+    }
+  }
 
   Future<void> _setWallpaper(dynamic palette, {bool both = false}) async {
     if (both) {
@@ -37,9 +74,10 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
       setState(() => _isSetting = true);
     }
     try {
-      final todayColor = palette.accent as Color;
-      final labelColor = palette.primaryLight as Color;
-      final monthLabelColor = palette.textMuted as Color;
+      final todayColor = _effectiveToday(palette.accent as Color);
+      final labelColor = _effectiveLabel(palette.primaryLight as Color);
+      final monthLabelColor =
+          _effectiveMonthLabel(palette.textMuted as Color);
 
       final physicalSize = View.of(context).physicalSize;
       final width = physicalSize.width;
@@ -54,6 +92,9 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
         monthLabelColor: monthLabelColor,
         width: width,
         height: height,
+        showCaption: _showCaption,
+        showTodayGlow: _showTodayGlow,
+        showPercent: _showPercent,
       );
 
       if (both) {
@@ -83,14 +124,14 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            backgroundColor: const Color(0xFF1A1A1A),
+            backgroundColor: palette.cardBackground as Color,
             behavior: SnackBarBehavior.floating,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppRadius.md)),
             content: Row(
               children: [
-                const Icon(Icons.check_circle_rounded,
-                    color: Colors.greenAccent, size: 20),
+                Icon(Icons.check_circle_rounded,
+                    color: palette.primaryLight as Color, size: 20),
                 const SizedBox(width: 12),
                 Text(both
                     ? 'Wallpaper set on both screens!'
@@ -119,9 +160,10 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
   Future<void> _shareWallpaper(dynamic palette) async {
     setState(() => _isSharing = true);
     try {
-      final todayColor = palette.accent as Color;
-      final labelColor = palette.primaryLight as Color;
-      final monthLabelColor = palette.textMuted as Color;
+      final todayColor = _effectiveToday(palette.accent as Color);
+      final labelColor = _effectiveLabel(palette.primaryLight as Color);
+      final monthLabelColor =
+          _effectiveMonthLabel(palette.textMuted as Color);
 
       final physicalSize = View.of(context).physicalSize;
       final width = physicalSize.width;
@@ -136,6 +178,9 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
         monthLabelColor: monthLabelColor,
         width: width,
         height: height,
+        showCaption: _showCaption,
+        showTodayGlow: _showTodayGlow,
+        showPercent: _showPercent,
       );
 
       final tempDir = await getTemporaryDirectory();
@@ -161,9 +206,10 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
 
   Future<void> _previewWallpaper(dynamic palette) async {
     try {
-      final todayColor = palette.accent as Color;
-      final labelColor = palette.primaryLight as Color;
-      final monthLabelColor = palette.textMuted as Color;
+      final todayColor = _effectiveToday(palette.accent as Color);
+      final labelColor = _effectiveLabel(palette.primaryLight as Color);
+      final monthLabelColor =
+          _effectiveMonthLabel(palette.textMuted as Color);
 
       final physicalSize = View.of(context).physicalSize;
       final width = physicalSize.width;
@@ -178,17 +224,37 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
         monthLabelColor: monthLabelColor,
         width: width,
         height: height,
+        showCaption: _showCaption,
+        showTodayGlow: _showTodayGlow,
+        showPercent: _showPercent,
       );
 
-      final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/gow_preview.png');
-      await file.writeAsBytes(pngBytes);
-
-      // Use share intent to let user set as wallpaper via system picker
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path, mimeType: 'image/png')],
-          text: 'Set as wallpaper',
+      if (!mounted) return;
+      // Fullscreen preview at native resolution
+      showDialog(
+        context: context,
+        barrierColor: Colors.black,
+        builder: (ctx) => Dialog.fullscreen(
+          backgroundColor: Colors.black,
+          child: Stack(
+            children: [
+              Center(
+                child: Image.memory(
+                  pngBytes,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              Positioned(
+                top: MediaQuery.of(ctx).padding.top + 8,
+                right: 16,
+                child: IconButton(
+                  icon: const Icon(Icons.close_rounded,
+                      color: Colors.white70, size: 26),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ),
+            ],
+          ),
         ),
       );
     } catch (e) {
@@ -207,14 +273,19 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
       isScrollControlled: true,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setSheetState) => Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF1A1A1A),
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          decoration: BoxDecoration(
+            color: palette.cardBackground as Color,
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(24)),
           ),
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(ctx).size.height * 0.85,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
               // Handle
               Container(
                 width: 40,
@@ -233,7 +304,7 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
                     width: 36,
                     height: 36,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(AppRadius.md),
                       color: (palette.primary as Color).withValues(alpha: 0.25),
                     ),
                     child: Icon(Icons.tune_rounded,
@@ -263,6 +334,7 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
                 onChanged: (v) {
                   setSheetState(() => _showCaption = v);
                   setState(() {});
+                  UserPrefs.saveShowCaption(v);
                 },
               ),
 
@@ -278,6 +350,7 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
                 onChanged: (v) {
                   setSheetState(() => _showTodayGlow = v);
                   setState(() {});
+                  UserPrefs.saveShowTodayGlow(v);
                 },
               ),
 
@@ -293,11 +366,87 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
                 onChanged: (v) {
                   setSheetState(() => _showPercent = v);
                   setState(() {});
+                  UserPrefs.saveShowPercent(v);
                 },
               ),
 
+              const SizedBox(height: 24),
+
+              // Colors section
+              Text(
+                'COLORS',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 3,
+                  color: Colors.white.withValues(alpha: 0.4),
+                ),
+              ),
+              const SizedBox(height: 14),
+              _SwatchRow(
+                title: 'Today Dot',
+                current: _effectiveToday(palette.accent as Color),
+                themeColor: palette.accent as Color,
+                onPick: (c) {
+                  setSheetState(() {});
+                  setState(() => _todayColor = c);
+                  UserPrefs.saveWallpaperTodayColor(c.toARGB32());
+                },
+              ),
+              const SizedBox(height: 14),
+              _SwatchRow(
+                title: 'Caption & Labels',
+                current: _effectiveLabel(palette.primaryLight as Color),
+                themeColor: palette.primaryLight as Color,
+                onPick: (c) {
+                  setSheetState(() {});
+                  setState(() => _labelColor = c);
+                  UserPrefs.saveWallpaperLabelColor(c.toARGB32());
+                },
+              ),
+              const SizedBox(height: 14),
+              _SwatchRow(
+                title: 'Month Labels',
+                current:
+                    _effectiveMonthLabel(palette.textMuted as Color),
+                themeColor: palette.textMuted as Color,
+                onPick: (c) {
+                  setSheetState(() {});
+                  setState(() => _monthLabelColor = c);
+                  UserPrefs.saveWallpaperMonthLabelColor(c.toARGB32());
+                },
+              ),
+              if (_todayColor != null ||
+                  _labelColor != null ||
+                  _monthLabelColor != null) ...[
+                const SizedBox(height: 10),
+                Center(
+                  child: TextButton(
+                    onPressed: () {
+                      setSheetState(() {});
+                      setState(() {
+                        _todayColor = null;
+                        _labelColor = null;
+                        _monthLabelColor = null;
+                      });
+                      UserPrefs.clearWallpaperColors();
+                    },
+                    child: Text(
+                      'Reset to theme colors',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: (palette.primaryLight as Color)
+                            .withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+
               const SizedBox(height: 8),
             ],
+            ),
           ),
         ),
       ),
@@ -314,11 +463,11 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
       painter = FlowWallpaperPainter(
         data: widget.data,
         pastColor: Colors.white,
-        todayColor: palette.accent,
+        todayColor: _effectiveToday(palette.accent),
         futureColor: Colors.white.withValues(alpha: 0.12),
         bgColor: const Color(0xFF0D0D0D),
-        labelColor: palette.primaryLight,
-        monthLabelColor: palette.textMuted,
+        labelColor: _effectiveLabel(palette.primaryLight),
+        monthLabelColor: _effectiveMonthLabel(palette.textMuted),
         showCaption: _showCaption,
         showTodayGlow: _showTodayGlow,
         showPercent: _showPercent,
@@ -327,11 +476,11 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
       painter = DotWallpaperPainter(
         data: widget.data,
         pastColor: Colors.white,
-        todayColor: palette.accent,
+        todayColor: _effectiveToday(palette.accent),
         futureColor: Colors.white.withValues(alpha: 0.12),
         bgColor: const Color(0xFF0D0D0D),
-        labelColor: palette.primaryLight,
-        monthLabelColor: palette.textMuted,
+        labelColor: _effectiveLabel(palette.primaryLight),
+        monthLabelColor: _effectiveMonthLabel(palette.textMuted),
         showCaption: _showCaption,
         showTodayGlow: _showTodayGlow,
         showPercent: _showPercent,
@@ -420,7 +569,7 @@ class _WallpaperPreviewScreenState extends State<WallpaperPreviewScreen> {
                           // Main device body
                           Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(28),
+                              borderRadius: BorderRadius.circular(AppRadius.xl),
                               color: const Color(0xFF1C1C1C),
                               border: Border.all(
                                 color: const Color(0xFF3A3A3A),
@@ -638,34 +787,18 @@ class _ActionButton extends StatelessWidget {
     return Container(
       height: 50,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
-        gradient: isPrimary
-            ? LinearGradient(
-                colors: [
-                  palette.primary as Color,
-                  palette.primaryLight as Color,
-                ],
-              )
-            : null,
-        color: isPrimary ? null : Colors.white.withValues(alpha: 0.07),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        color: isPrimary
+            ? palette.primary as Color
+            : Colors.white.withValues(alpha: 0.07),
         border: isPrimary
             ? null
             : Border.all(color: Colors.white.withValues(alpha: 0.10)),
-        boxShadow: isPrimary
-            ? [
-                BoxShadow(
-                  color:
-                      (palette.primaryLight as Color).withValues(alpha: 0.25),
-                  blurRadius: 16,
-                  offset: const Offset(0, 4),
-                ),
-              ]
-            : null,
       ),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
           onTap: isLoading ? null : onTap,
           child: Center(
             child: isLoading
@@ -723,7 +856,7 @@ class _ToggleTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppRadius.lg),
         color: Colors.white.withValues(alpha: 0.05),
         border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
       ),
@@ -764,6 +897,80 @@ class _ToggleTile extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ── Wallpaper Color Presets ──────────────────────────────────────
+
+/// Curated preset palette for wallpaper color overrides (all legible on the
+/// dark wallpaper background).
+const List<Color> _wallpaperColorPresets = [
+  Color(0xFFE8A838), // amber
+  Color(0xFF9EC043), // lime
+  Color(0xFF4CD7A9), // mint
+  Color(0xFF00E5FF), // cyan
+  Color(0xFF42A5F5), // blue
+  Color(0xFF7C4DFF), // violet
+  Color(0xFFF06292), // pink
+  Color(0xFFFF7043), // orange
+  Color(0xFFFF5252), // red
+  Color(0xFFF5F5F5), // white
+];
+
+/// One labelled row of color swatches for the customize sheet.
+class _SwatchRow extends StatelessWidget {
+  const _SwatchRow({
+    required this.title,
+    required this.current,
+    required this.themeColor,
+    required this.onPick,
+  });
+
+  final String title;
+  final Color current;
+  final Color themeColor;
+  final ValueChanged<Color> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: _wallpaperColorPresets.map((c) {
+            final isSelected = c.toARGB32() == current.toARGB32();
+            return GestureDetector(
+              onTap: () => onPick(c),
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: c,
+                  border: isSelected
+                      ? Border.all(color: Colors.white, width: 2.5)
+                      : Border.all(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          width: 1,
+                        ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
 }

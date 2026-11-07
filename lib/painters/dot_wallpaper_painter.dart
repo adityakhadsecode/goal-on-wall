@@ -32,15 +32,23 @@ class DotWallpaperPainter extends CustomPainter {
   final bool showTodayGlow;
   final bool showPercent;
 
-  bool get _isYearLayout => data.calendarType == CalendarType.year;
-
   @override
   void paint(Canvas canvas, Size size) {
     // Background
     canvas.drawRect(Offset.zero & size, Paint()..color = bgColor);
 
-    if (_isYearLayout) {
-      _paintMonthlyLayout(canvas, size);
+    if (data.calendarType == CalendarType.year) {
+      switch (data.yearLayout) {
+        case YearLayoutStyle.days:
+          _paintFlatLayout(canvas, size);
+          break;
+        case YearLayoutStyle.months:
+          _paintMonthlyLayout(canvas, size);
+          break;
+        case YearLayoutStyle.quarters:
+          _paintQuarterlyLayout(canvas, size);
+          break;
+      }
     } else {
       _paintFlatLayout(canvas, size);
     }
@@ -181,6 +189,102 @@ class DotWallpaperPainter extends CustomPainter {
 
         globalDayIndex++;
       }
+    }
+  }
+
+  // ── Quarterly layout (Year Calendar) ─────────────────────────
+
+  static const _quarterMonths = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9],
+    [10, 11, 12],
+  ];
+  static const _quarterNames = ['Q1', 'Q2', 'Q3', 'Q4'];
+
+  /// Four quarter headers, each with one dot-row per month.
+  void _paintQuarterlyLayout(Canvas canvas, Size size) {
+    final year = data.startDate.year;
+    final elapsed = data.elapsedDays; // global day index for coloring
+
+    const outerPadH = 0.07;
+    final leftMargin = size.width * outerPadH;
+    final topMargin = size.height * 0.10;
+    final availW = size.width - leftMargin * 2;
+    final availH = size.height * (1 - 0.10 - 0.16); // caption zone at bottom
+
+    final quarterHeaderH = availH * 0.055;
+    final monthRowH = availH * 0.042;
+    final quarterGap = availH * 0.018;
+    final monthLabelW = availW * 0.05;
+
+    int globalDayIndex = 0;
+
+    double y = topMargin;
+    for (int q = 0; q < 4; q++) {
+      final months = _quarterMonths[q];
+
+      // Quarter header
+      _drawText(
+        canvas,
+        '${_quarterNames[q]}  ·  ${_monthNames[months.first - 1]}–${_monthNames[months.last - 1]}',
+        Offset(leftMargin, y),
+        TextStyle(
+          fontSize: size.width * 0.026,
+          fontWeight: FontWeight.w600,
+          color: monthLabelColor,
+        ),
+      );
+      y += quarterHeaderH;
+
+      for (final month in months) {
+        // Month initial
+        _drawText(
+          canvas,
+          _monthNames[month - 1].substring(0, 1),
+          Offset(leftMargin, y + monthRowH * 0.18),
+          TextStyle(
+            fontSize: monthRowH * 0.5,
+            fontWeight: FontWeight.w600,
+            color: monthLabelColor,
+          ),
+        );
+
+        // Day dots across the remaining width
+        final days = _daysInMonth(year, month);
+        final dotAvailW = availW - monthLabelW;
+        final dotD = math.min(
+          monthRowH * 0.72,
+          dotAvailW / (31 + 0.5 * 30),
+        );
+        final dotGap = dotD * 0.5;
+        final dotR = dotD / 2;
+
+        for (int d = 0; d < days; d++) {
+          final cx = leftMargin + monthLabelW + d * (dotD + dotGap) + dotR;
+          final cy = y + monthRowH / 2;
+
+          final isToday = globalDayIndex == elapsed;
+          final isPast = globalDayIndex < elapsed;
+          final color = isPast ? pastColor : (isToday ? todayColor : futureColor);
+
+          canvas.drawCircle(Offset(cx, cy), dotR, Paint()..color = color);
+
+          if (isToday && showTodayGlow) {
+            final glowPaint = Paint()
+              ..color = todayColor.withValues(alpha: 0.4)
+              ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 5);
+            canvas.drawCircle(Offset(cx, cy), dotR * 2, glowPaint);
+            canvas.drawCircle(Offset(cx, cy), dotR, Paint()..color = todayColor);
+          }
+
+          globalDayIndex++;
+        }
+
+        y += monthRowH;
+      }
+
+      y += quarterGap;
     }
   }
 

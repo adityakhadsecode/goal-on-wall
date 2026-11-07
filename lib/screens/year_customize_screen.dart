@@ -8,8 +8,6 @@ import '../widgets/customize_shared_widgets.dart';
 import '../models/wallpaper_config.dart';
 import 'wallpaper_preview_screen.dart';
 
-enum YearLayoutStyle { days, months, quarters }
-
 class YearCustomizeScreen extends StatefulWidget {
   const YearCustomizeScreen({
     super.key,
@@ -25,11 +23,21 @@ class YearCustomizeScreen extends StatefulWidget {
 }
 
 class _YearCustomizeScreenState extends State<YearCustomizeScreen> {
-  YearLayoutStyle _selected = YearLayoutStyle.days;
+  YearLayoutStyle _selected = YearLayoutStyle.months;
+
+  @override
+  void initState() {
+    super.initState();
+    // Editing an existing calendar: start from its saved layout
+    if (widget.initialData != null) {
+      _selected = widget.initialData!.yearLayout;
+    }
+  }
 
   void _generate(AppColorPalette palette) {
     final wallpaperData = WallpaperData.yearCalendar(
       wallpaperTheme: widget.wallpaperTheme,
+      yearLayout: _selected,
     );
     Navigator.push(
       context,
@@ -86,8 +94,9 @@ class _YearCustomizeScreenState extends State<YearCustomizeScreen> {
 
                 const SizedBox(height: 32),
 
+                if (widget.wallpaperTheme == WallpaperTheme.dots) ...[
                 GlassCard(
-                  borderRadius: 24,
+                  borderRadius: AppRadius.xl,
                   padding: const EdgeInsets.all(22),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,6 +154,8 @@ class _YearCustomizeScreenState extends State<YearCustomizeScreen> {
                     ],
                   ),
                 ),
+
+                ],
 
                 const SizedBox(height: 28),
 

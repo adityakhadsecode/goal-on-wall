@@ -148,7 +148,7 @@ class DateInputField extends StatelessWidget {
         const SizedBox(height: 6),
         Container(
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             color: Colors.white.withValues(alpha: 0.05),
             border: Border.all(
               color: Colors.white.withValues(alpha: 0.08),
@@ -210,37 +210,18 @@ class GenerateWallpaperButton extends StatelessWidget {
         height: 56,
         width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(18),
-          gradient: LinearGradient(
-            colors: [
-              palette.primary,
-              palette.primaryLight,
-              palette.accent,
-            ],
-            stops: const [0.0, 0.6, 1.0],
-          ),
-          boxShadow: enabled
-              ? [
-                  BoxShadow(
-                    color: palette.primaryLight.withValues(alpha: 0.30),
-                    blurRadius: 24,
-                    offset: const Offset(0, 6),
-                  ),
-                ]
-              : [],
-          border: Border.all(
-            color: Colors.white.withValues(alpha: 0.15),
-          ),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+          color: palette.primary,
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(AppRadius.lg),
             onTap: enabled ? onTap : null,
             child: const Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+                Icon(Icons.wallpaper_rounded, color: Colors.white, size: 20),
                 SizedBox(width: 10),
                 Text(
                   'Generate Wallpaper',
@@ -281,7 +262,7 @@ class CardSectionHeader extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             color: palette.primary.withValues(alpha: 0.25),
           ),
           child: Icon(icon, color: palette.primaryLight, size: 18),

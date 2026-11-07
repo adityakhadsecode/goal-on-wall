@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../theme/theme_provider.dart';
+import '../theme/app_theme.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 
@@ -106,7 +107,7 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: GlassCard(
-                borderRadius: 20,
+                borderRadius: AppRadius.lg,
                 padding: const EdgeInsets.all(20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -137,7 +138,7 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.03),
-                  borderRadius: BorderRadius.circular(14),
+                  borderRadius: BorderRadius.circular(AppRadius.lg),
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.05),
                   ),
@@ -178,7 +179,7 @@ class _YearCalendarScreenState extends State<YearCalendarScreen>
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: GlassCard(
-                  borderRadius: 24,
+                  borderRadius: AppRadius.xl,
                   padding: const EdgeInsets.all(16),
                   child: TabBarView(
                     controller: _tabController,

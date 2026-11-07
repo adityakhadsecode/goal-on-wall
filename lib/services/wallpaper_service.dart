@@ -23,6 +23,9 @@ class WallpaperService {
     required double width,
     required double height,
     Color bgColor = const Color(0xFF0D0D0D),
+    bool showCaption = true,
+    bool showTodayGlow = true,
+    bool showPercent = true,
   }) async {
     final recorder = ui.PictureRecorder();
     final canvas = Canvas(
@@ -40,6 +43,9 @@ class WallpaperService {
         bgColor: bgColor,
         labelColor: labelColor,
         monthLabelColor: monthLabelColor,
+        showCaption: showCaption,
+        showTodayGlow: showTodayGlow,
+        showPercent: showPercent,
       );
     } else {
       painter = DotWallpaperPainter(
@@ -50,6 +56,9 @@ class WallpaperService {
         bgColor: bgColor,
         labelColor: labelColor,
         monthLabelColor: monthLabelColor,
+        showCaption: showCaption,
+        showTodayGlow: showTodayGlow,
+        showPercent: showPercent,
       );
     }
 

@@ -74,9 +74,16 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
 
   bool get _isComplete {
     if (_useSaved && _savedBirthDate != null) return true;
-    return _dayCtrl.text.length == 2 &&
-        _monthCtrl.text.length == 2 &&
-        _yearCtrl.text.length == 4;
+    if (_dayCtrl.text.length != 2 ||
+        _monthCtrl.text.length != 2 ||
+        _yearCtrl.text.length != 4) {
+      return false;
+    }
+    // Reject future dates
+    final date = DateTime(int.parse(_yearCtrl.text),
+        int.parse(_monthCtrl.text), int.parse(_dayCtrl.text));
+    final today = DateTime.now();
+    return !date.isAfter(DateTime(today.year, today.month, today.day));
   }
 
   int get _birthMaxDay {
@@ -190,7 +197,7 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
                   // ── Saved date available ──────────────────────────────
                   if (_savedBirthDate != null) ...[
                     GlassCard(
-                      borderRadius: 24,
+                      borderRadius: AppRadius.xl,
                       padding: const EdgeInsets.all(22),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -206,7 +213,7 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
                           Container(
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.05),
-                              borderRadius: BorderRadius.circular(14),
+                              borderRadius: BorderRadius.circular(AppRadius.lg),
                               border: Border.all(
                                   color: Colors.white.withValues(alpha: 0.08)),
                             ),
@@ -246,7 +253,7 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
                               decoration: BoxDecoration(
                                 color: palette.primaryLight
                                     .withValues(alpha: 0.1),
-                                borderRadius: BorderRadius.circular(14),
+                                borderRadius: BorderRadius.circular(AppRadius.lg),
                                 border: Border.all(
                                     color: palette.primaryLight
                                         .withValues(alpha: 0.25)),
@@ -289,7 +296,7 @@ class _LifeCustomizeScreenState extends State<LifeCustomizeScreen> {
                   ] else ...[
                     // ── No saved date: show regular fields ─────────────
                     GlassCard(
-                      borderRadius: 24,
+                      borderRadius: AppRadius.xl,
                       padding: const EdgeInsets.all(22),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -428,7 +435,7 @@ class _ModeChip extends StatelessWidget {
             color: isSelected
                 ? palette.primaryLight.withValues(alpha: 0.2)
                 : Colors.transparent,
-            borderRadius: BorderRadius.circular(11),
+            borderRadius: BorderRadius.circular(AppRadius.md),
             border: isSelected
                 ? Border.all(
                     color: palette.primaryLight.withValues(alpha: 0.4))
