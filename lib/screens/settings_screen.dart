@@ -8,7 +8,9 @@ import '../theme/theme_provider.dart';
 import '../widgets/organic_background.dart';
 import '../widgets/glass_card.dart';
 import '../services/user_prefs.dart';
+import 'dart:io' show Platform;
 import '../services/background_task.dart';
+import '../services/battery_service.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -22,6 +24,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   String _userName = '';
   String _appVersion = '...';
   bool _autoSetWallpaper = true;
+  bool? _batteryOptimized;
 
   @override
   void initState() {
@@ -30,6 +33,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _loadUserName();
     _loadVersion();
     _loadAutoSetWallpaper();
+    _loadBatteryOptimized();
+  }
+
+  Future<void> _loadBatteryOptimized() async {
+    if (!Platform.isAndroid) return;
+    final ok = await BatteryService.isIgnoringOptimizations();
+    if (mounted) setState(() => _batteryOptimized = ok);
   }
 
   Future<void> _loadBirthDate() async {
@@ -60,6 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'daily-wallpaper-refresh',
         refreshWallpaperTask,
         frequency: const Duration(hours: 24),
+        initialDelay: untilNextMidnight(),
         constraints: Constraints(networkType: NetworkType.notRequired),
         existingWorkPolicy: ExistingPeriodicWorkPolicy.replace,
       );
@@ -275,6 +286,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           palette,
                           _toggleAutoSetWallpaper,
                         ),
+                        if (Platform.isAndroid) ...[
+                          Divider(
+                            color: Colors.white.withValues(alpha: 0.05),
+                            height: 1,
+                          ),
+                          _buildTappableSettingsItem(
+                            'Battery Optimization',
+                            _batteryOptimized == null
+                                ? 'Checking…'
+                                : (_batteryOptimized!
+                                    ? 'Allowed'
+                                    : 'Restricted — tap to allow'),
+                            Icons.battery_saver_rounded,
+                            palette,
+                            onTap: () async {
+                              await BatteryService.openOptimizationSettings();
+                              final ok =
+                                  await BatteryService.isIgnoringOptimizations();
+                              if (mounted) setState(() => _batteryOptimized = ok);
+                            },
+                          ),
+                        ],
                       ],
                     ),
                   ),

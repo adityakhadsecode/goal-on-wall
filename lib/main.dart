@@ -32,13 +32,14 @@ void main() async {
     await Workmanager().initialize(callbackDispatcher);
     final autoSet = await UserPrefs.getAutoSetWallpaper();
     if (autoSet) {
-      await Workmanager().registerPeriodicTask(
-        'daily-wallpaper-refresh',
-        refreshWallpaperTask,
-        frequency: const Duration(hours: 24),
-        constraints: Constraints(networkType: NetworkType.notRequired),
-        existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
-      );
+    await Workmanager().registerPeriodicTask(
+      'daily-wallpaper-refresh',
+      refreshWallpaperTask,
+      frequency: const Duration(hours: 24),
+      initialDelay: untilNextMidnight(),
+      constraints: Constraints(networkType: NetworkType.notRequired),
+      existingWorkPolicy: ExistingPeriodicWorkPolicy.keep,
+    );
     }
   }
 

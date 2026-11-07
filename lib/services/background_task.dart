@@ -8,6 +8,14 @@ import 'wallpaper_storage.dart';
 /// The task name registered with WorkManager for daily wallpaper refresh.
 const refreshWallpaperTask = 'refreshWallpaper';
 
+/// Duration until the next local midnight. Used as the [Workmanager]
+/// initial delay so the daily refresh runs around a consistent time instead
+/// of drifting 24h from whenever it was registered.
+Duration untilNextMidnight() {
+  final now = DateTime.now();
+  return DateTime(now.year, now.month, now.day + 1).difference(now);
+}
+
 /// Top-level entry point called by WorkManager in a separate isolate.
 /// Must be annotated and be a top-level (non-class) function.
 @pragma('vm:entry-point')
